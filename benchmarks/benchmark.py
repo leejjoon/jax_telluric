@@ -47,6 +47,7 @@ def main() -> None:
     parser.add_argument("--method", choices=("direct", "direct_sparse"), default="direct")
     parser.add_argument("--vectorize-layers", action="store_true")
     parser.add_argument("--mixed-precision", action="store_true")
+    parser.add_argument("--correction", type=Path)
     parser.add_argument("--v2", type=float, default=5020.0)
     parser.add_argument("--pixels", type=int, default=512)
     args = parser.parse_args()
@@ -64,6 +65,7 @@ def main() -> None:
     from jax_telluric import (
         AERLineDatabase,
         ExoJAXOpacityBackend,
+        LBLRTMOpticalDepthCorrection,
         SpectralOrder,
         TelluricModel,
         TelluricParameters,
@@ -85,7 +87,14 @@ def main() -> None:
     backend = ExoJAXOpacityBackend.prepare({"H2O": database}, nu_grid, methods=args.method,
                                          vectorize_layers=args.vectorize_layers,
                                          mixed_precision=args.mixed_precision)
-    model = TelluricModel(profile, nu_grid, backend)
+    correction = None if args.correction is None else LBLRTMOpticalDepthCorrection.load(args.correction)
+    model = TelluricModel(
+        profile,
+        nu_grid,
+        backend,
+        accuracy_mode="fast" if correction is None else "lblrtm_corrected",
+        correction=correction,
+    )
     wavelength = np.linspace(1.0e7 / limits[1], 1.0e7 / limits[0], args.pixels)
     order = SpectralOrder(wavelength, np.ones(args.pixels), np.full(args.pixels, 0.01), zenith_angle_deg=30.0)
 
@@ -113,6 +122,7 @@ def main() -> None:
         "method": args.method,
         "vectorize_layers": args.vectorize_layers,
         "mixed_precision": args.mixed_precision,
+        "accuracy_mode": model.accuracy_mode,
         "device": str(jax.devices()[0]),
         "jax": jax.__version__,
         "jaxlib": jax.lib.__version__,

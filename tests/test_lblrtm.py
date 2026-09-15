@@ -7,6 +7,9 @@ import numpy as np
 from jax_telluric import (
     LBLRTMRunConfig,
     LBLRTMSpectrum,
+    ArrayOpacityBackend,
+    AtmosphereProfile,
+    build_lblrtm_correction,
     compare_transmission,
     degrade_to_resolving_power,
     load_atmosphere_csv,
@@ -82,3 +85,40 @@ def test_recorded_aer_co_validation_meets_mvp_thresholds():
     assert abs(metrics["line_shift_resolution_elements"]) < thresholds[
         "absolute_line_shift_resolution_elements"
     ]
+
+
+def test_build_lblrtm_correction_isolates_continuum_and_line_residual(tmp_path, monkeypatch):
+    full_profile = load_atmosphere_csv("data/profiles/example_midlatitude.csv")
+    profile = AtmosphereProfile(
+        full_profile.pressure_edges_bar,
+        full_profile.temperature_k,
+        full_profile.altitude_km,
+        {"H2O": full_profile.vmr["H2O"]},
+        full_profile.mean_molecular_weight_g_mol,
+        full_profile.gravity_m_s2,
+    )
+    nu = np.geomspace(5000.0, 5001.0, 16)
+    zero_xs = np.zeros((len(profile.temperature_k), len(nu)))
+    opacity = ArrayOpacityBackend({"H2O": zero_xs})
+
+    def fake_lblrtm(workdir, run_profile, config, executable, tape3, mt_ckd_data):
+        del workdir, executable, tape3, mt_ckd_data
+        if config.continuum_flag == 1:
+            tau = 0.07
+        elif config.continuum_flag == 2:
+            tau = 0.05
+        elif config.continuum_flag == 3:
+            tau = 0.04
+        else:
+            assert tuple(run_profile.vmr) == ("H2O",)
+            tau = 0.01
+        return LBLRTMSpectrum(nu, np.exp(-tau) * np.ones_like(nu))
+
+    monkeypatch.setattr("jax_telluric.corrections.run_lblrtm", fake_lblrtm)
+    correction = build_lblrtm_correction(
+        tmp_path, profile, nu, opacity, "lblrtm", "TAPE3", "mt_ckd.nc"
+    )
+    np.testing.assert_allclose(correction.water_self_optical_depth, 0.02)
+    np.testing.assert_allclose(correction.water_foreign_optical_depth, 0.03)
+    np.testing.assert_allclose(correction.line_residual_optical_depth["H2O"], 0.01)
+    np.testing.assert_allclose(correction.reference_background_optical_depth, 0.01)

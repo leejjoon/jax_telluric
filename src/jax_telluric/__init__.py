@@ -5,6 +5,7 @@ from jax import config as _jax_config
 _jax_config.update("jax_enable_x64", True)
 
 from .fit import FitResult, fit_order
+from .corrections import LBLRTMOpticalDepthCorrection, build_lblrtm_correction
 from .aer import AERLineDatabase
 from .exojax_backend import ExoJAXOpacityBackend
 from .io import load_atmosphere_csv, load_mipas_profile
@@ -31,6 +32,7 @@ __all__ = [
     "ExoJAXOpacityBackend",
     "FitResult",
     "LBLRTMSpectrum",
+    "LBLRTMOpticalDepthCorrection",
     "LBLRTMRunConfig",
     "SpectralOrder",
     "ReferenceWaterContinuum",
@@ -38,6 +40,7 @@ __all__ = [
     "TelluricParameters",
     "ValidationMetrics",
     "compare_transmission",
+    "build_lblrtm_correction",
     "degrade_to_resolving_power",
     "fit_order",
     "igrins_wavenumber_grid",

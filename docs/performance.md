@@ -14,6 +14,12 @@ Both runs used 30 synchronized timed calls on the RTX 5000 Ada.
 Compile + first call took 11.1 s forward and 14.1 s for value + gradient.
 Raw measurements and accuracy metrics are in `docs/mixed_precision_results.json`.
 
+The optional [LBLRTM-corrected mode](lblrtm_corrected_mode.md) adds
+precomputed MT_CKD and line-physics residuals. On the 20 cm-1 mixed-precision
+GPU case, its forward and objective-gradient medians were 2.03 and 3.09 ms,
+versus 2.23 and 3.43 ms in fast mode. The apparent improvement is timing
+noise; correction overhead is negligible relative to opacity evaluation.
+
 **Accuracy versus float64:** across three H2O scales (exp(-0.7), 1,
 exp(0.7)), maximum absolute flux difference was 3.53e-8. Maximum absolute
 objective-gradient difference was 7.53e-7; maximum relative difference among

@@ -7,6 +7,7 @@ from jax_telluric import (
     AtmosphereProfile,
     SpectralOrder,
     ReferenceWaterContinuum,
+    LBLRTMOpticalDepthCorrection,
     TelluricModel,
     TelluricParameters,
     fit_order,
@@ -111,6 +112,47 @@ def test_water_continuum_uses_linear_foreign_and_quadratic_self_scaling():
     )
     actual_tau = -np.log(np.asarray(continuum_model.transmission(params(np.log(2.0)))))
     np.testing.assert_allclose(actual_tau, 2 * (0.01 * 4.0 + 0.02 * 2.0))
+
+
+def test_lblrtm_corrected_mode_scales_continuum_and_line_residuals(tmp_path):
+    model, nu = make_model()
+    layers, samples = 2, len(nu)
+    correction = LBLRTMOpticalDepthCorrection(
+        wavenumber_cm1=nu,
+        pressure_layer_bar=model.profile.pressure_layer_bar,
+        temperature_k=model.profile.temperature_k,
+        air_column_cm2=model.profile.air_column_cm2,
+        reference_vmr=model.profile.vmr,
+        water_self_optical_depth=np.full(samples, 0.01),
+        water_foreign_optical_depth=np.full(samples, 0.02),
+        reference_background_optical_depth=np.zeros(samples),
+        line_residual_optical_depth={"H2O": np.full(samples, -0.003)},
+    )
+    path = tmp_path / "correction.npz"
+    correction.save(path)
+    correction = LBLRTMOpticalDepthCorrection.load(path)
+    corrected = TelluricModel(
+        model.profile, nu, model.opacity,
+        accuracy_mode="lblrtm_corrected", correction=correction,
+    )
+    scale = 2.0
+    parameters = params(np.log(scale))
+    fast_tau = -np.log(np.asarray(model.transmission(parameters)))
+    corrected_tau = -np.log(np.asarray(corrected.transmission(parameters)))
+    expected_extra = 0.01 * scale**2 + 0.02 * scale - 0.003 * scale
+    np.testing.assert_allclose(corrected_tau - fast_tau, expected_extra, rtol=2e-12, atol=2e-12)
+    derivative = jax.grad(
+        lambda log_scale: jnp.sum(corrected.transmission(params(log_scale)))
+    )(jnp.asarray(np.log(scale)))
+    assert jnp.isfinite(derivative)
+
+
+def test_lblrtm_corrected_mode_requires_matching_correction():
+    model, nu = make_model()
+    with np.testing.assert_raises(ValueError):
+        TelluricModel(model.profile, nu, model.opacity, accuracy_mode="lblrtm_corrected")
+    with np.testing.assert_raises(ValueError):
+        TelluricModel(model.profile, nu, model.opacity, accuracy_mode="unknown")
 
 
 

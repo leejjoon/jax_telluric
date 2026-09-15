@@ -41,6 +41,15 @@ all three acceptance thresholds below. The remaining rungs are explicitly
 future validation work; their effects are already isolated in the reference
 fixture where possible.
 
+An optional fixed-profile implementation now covers the correction ladder for
+the 5000--5020 cm-1 example order. `scripts/build_lblrtm_correction.py`
+isolates H2O self/foreign continua and per-species LBLRTM line residuals, then
+stores the remaining reference background. Its corrected 99th-percentile
+absolute error is 6.61e-5. Checks at 0.5--2x water abundance and airmass
+1--2.5 remain below 3.10e-3 at the 99th percentile. This validates that
+profile and grid; broader pressure-temperature and wavelength coverage
+remains future work.
+
 Use a water-dominated H interval and a mixed-species K interval. Within pixels
 whose reference transmission exceeds 0.05, require median absolute error below
 `1e-3`, 99th-percentile error below `5e-3`, and line-center displacement below

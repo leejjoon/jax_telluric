@@ -58,6 +58,18 @@ class ContinuumBackend(Protocol):
         """Return vertical optical depth with shape (layer, wavenumber)."""
 
 
+class CorrectionBackend(Protocol):
+    """Internal seam for an opt-in fixed-profile optical-depth correction."""
+
+    species: tuple[str, ...]
+
+    def validate(self, profile: AtmosphereProfile, wavenumber_cm1: np.ndarray) -> None: ...
+
+    def optical_depth(
+        self, profile: AtmosphereProfile, scaled_vmr: Mapping[str, jnp.ndarray]
+    ) -> jnp.ndarray: ...
+
+
 @dataclass(frozen=True)
 class ArrayOpacityBackend:
     """Fixed cross sections for fixtures and precomputed-opacity workflows."""
@@ -126,6 +138,8 @@ class TelluricModel:
         opacity: OpacityBackend,
         continuum: ContinuumBackend | None = None,
         max_lsf_sigma_kms: float = 20.0,
+        accuracy_mode: str = "fast",
+        correction: CorrectionBackend | None = None,
     ) -> None:
         nu = np.asarray(wavenumber_cm1, dtype=float)
         if nu.ndim != 1 or len(nu) < 8 or np.any(np.diff(nu) <= 0.0):
@@ -135,10 +149,24 @@ class TelluricModel:
             raise ValueError("wavenumber grid must be evenly spaced in log wavenumber")
         if set(opacity.species) - set(profile.vmr):
             raise ValueError("the atmosphere has no VMR profile for an opacity species")
+        if accuracy_mode not in ("fast", "lblrtm_corrected"):
+            raise ValueError("accuracy_mode must be 'fast' or 'lblrtm_corrected'")
+        if accuracy_mode == "fast" and correction is not None:
+            raise ValueError("a correction requires accuracy_mode='lblrtm_corrected'")
+        if accuracy_mode == "lblrtm_corrected" and correction is None:
+            raise ValueError("accuracy_mode='lblrtm_corrected' requires a correction template")
+        if accuracy_mode == "lblrtm_corrected" and continuum is not None:
+            raise ValueError("LBLRTM corrections already include the H2O continuum")
+        if correction is not None:
+            correction.validate(profile, nu)
         self.profile = profile
         self.wavenumber_cm1 = jnp.asarray(nu)
         self.opacity = opacity
+        correction_species = () if correction is None else correction.species
+        self.species = tuple(dict.fromkeys((*opacity.species, *correction_species)))
         self.continuum = continuum
+        self.accuracy_mode = accuracy_mode
+        self.correction = correction
         self.velocity_step_kms = float(dlog[0] * _C_KMS)
         self.kernel_half_width = int(np.ceil(5.0 * max_lsf_sigma_kms / self.velocity_step_kms))
 
@@ -161,6 +189,8 @@ class TelluricModel:
         tau = jnp.zeros((air_column.size, self.wavenumber_cm1.size))
         if self.continuum is not None:
             tau = tau + self.continuum.optical_depth(self.profile, vmr_scaled)
+        if self.correction is not None:
+            tau = tau + self.correction.optical_depth(self.profile, vmr_scaled)
         for species in self.opacity.species:
             tau = tau + xs[species] * (air_column * vmr_scaled[species])[:, None]
         mu = jnp.cos(jnp.deg2rad(zenith_angle_deg))

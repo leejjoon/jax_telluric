@@ -85,7 +85,7 @@ def fit_order(
     ``log_jitter``.
     """
 
-    codec = _ParameterCodec(model.opacity.species, len(np.asarray(initial.continuum_coeffs)))
+    codec = _ParameterCodec(model.species, len(np.asarray(initial.continuum_coeffs)))
     names = [*codec.species, "velocity_kms", "wavelength_stretch", "lsf_sigma_kms"]
     names.extend(f"continuum_{index}" for index in range(codec.continuum_size))
     names.append("log_jitter")

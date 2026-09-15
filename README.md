@@ -84,3 +84,25 @@ mixed-precision section in `docs/performance.md` for scope and reproduction,
 and [extended accuracy validation](docs/mixed_precision_validation.md) for
 multi-species, atmospheric-state, spectral-derivative, and fit-recovery checks.
 The extended checks pass, including paired mixed-precision and float64 fits.
+
+## Optional LBLRTM-corrected mode
+
+The default `accuracy_mode="fast"` preserves the optimized behavior above.
+For a fixed atmospheric profile and order grid, an offline LBLRTM correction
+template can add MT_CKD H2O continuum, line coupling, speed-dependent line
+shape residuals, distant-line absorption, and the remaining reference
+background while retaining JAX derivatives during fitting:
+
+```python
+correction = LBLRTMOpticalDepthCorrection.load("data/corrections/order.npz")
+model = TelluricModel(
+    profile, nu_grid, backend,
+    accuracy_mode="lblrtm_corrected", correction=correction,
+)
+```
+
+Generate a template with `scripts/build_lblrtm_correction.py`. In the tested
+5000--5020 cm-1 order, the correction reduced the 99th-percentile absolute
+error against full LBLRTM from 0.102 to 6.61e-5 with negligible steady-state
+GPU overhead. See [the corrected-mode guide](docs/lblrtm_corrected_mode.md)
+for usage, assumptions, and reproduction.
