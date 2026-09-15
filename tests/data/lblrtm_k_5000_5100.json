@@ -1,0 +1,20 @@
+{
+  "lblrtm": "12.17",
+  "mt_ckd": "4.3",
+  "aer_line_file": "3.9",
+  "profile": "data/profiles/example_midlatitude.csv",
+  "wavenumber_cm1": [
+    5000.0,
+    5100.0
+  ],
+  "zenith_angle_deg": 0.0,
+  "resolving_power": 45000.0,
+  "samples_per_resolution": 3.0,
+  "continuum_flags": {
+    "all": 1,
+    "no_self": 2,
+    "no_foreign": 3,
+    "no_water": 4
+  },
+  "sha256": "4e22258e68187d91857f81a375d7b4bdea543b833b010ac317b7648b621c628d"
+}

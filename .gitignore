@@ -1,0 +1,13 @@
+.venv/
+.conda-lblrtm/
+.uv-cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.jax_cache/
+data/databases/
+data/lblrtm/
+build/
+dist/
+benchmarks/results/*.json
+benchmarks/results/*.npz

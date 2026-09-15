@@ -1,0 +1,22 @@
+{
+  "case": "CO-only, continuum disabled, AER 3.9 lines",
+  "wavenumber_cm1": [
+    4290.0,
+    4310.0
+  ],
+  "lblrtm": "12.17",
+  "exojax": "2.5.0",
+  "resolving_power": 45000.0,
+  "metrics": {
+    "median_absolute_error": 4.552606291474692e-05,
+    "percentile_99_absolute_error": 0.0022495308958124897,
+    "maximum_absolute_error": 0.002805111317380371,
+    "line_shift_resolution_elements": 0.014701449559003871,
+    "compared_samples": 628
+  },
+  "thresholds": {
+    "median_absolute_error": 0.001,
+    "percentile_99_absolute_error": 0.005,
+    "absolute_line_shift_resolution_elements": 0.1
+  }
+}

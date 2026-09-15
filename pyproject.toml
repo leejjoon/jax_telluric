@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jax-telluric"
+version = "0.1.0"
+description = "Differentiable terrestrial telluric transmission for high-resolution spectra"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+  "exojax==2.5.0",
+  "jax>=0.5,<0.7",
+  # RADIS currently pulls a vaex wheel built against NumPy 1.x.
+  "numpy>=1.26,<2",
+  "scipy>=1.13,<2",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.optional-dependencies]
+gpu = ["jax[cuda12]>=0.5,<0.7"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jax_telluric"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

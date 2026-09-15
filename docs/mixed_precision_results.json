@@ -1,0 +1,94 @@
+{
+  "float64": {
+    "platform": "gpu",
+    "method": "direct_sparse",
+    "vectorize_layers": true,
+    "mixed_precision": false,
+    "device": "cuda:0",
+    "jax": "0.6.2",
+    "jaxlib": "0.6.2",
+    "python": "3.10.12",
+    "case": {
+      "molecule": "H2O",
+      "line_source": "AER 3.9",
+      "wavenumber_cm1": [
+        5000.0,
+        5100.0
+      ],
+      "atmospheric_layers": 6,
+      "spectral_lines_with_25_cm-1_margin": 4669,
+      "high_resolution_samples": 5348,
+      "detector_pixels": 2048,
+      "resolving_power": 45000
+    },
+    "forward": {
+      "compile_and_first_s": 11.226950912736356,
+      "median_ms": 61.46922707557678,
+      "mean_ms": 61.46039444332321,
+      "minimum_ms": 61.322721652686596,
+      "p95_ms": 61.56905181705952
+    },
+    "value_and_gradient": {
+      "compile_and_first_s": 14.16446337569505,
+      "median_ms": 73.27112276107073,
+      "mean_ms": 73.32488909984629,
+      "minimum_ms": 73.10300786048174,
+      "p95_ms": 73.85147362947464
+    },
+    "iterations": 30,
+    "x64": true,
+    "device_kind": "NVIDIA RTX 5000 Ada Generation",
+    "core_pairs": 35862
+  },
+  "mixed": {
+    "platform": "gpu",
+    "method": "direct_sparse",
+    "vectorize_layers": true,
+    "mixed_precision": true,
+    "device": "cuda:0",
+    "jax": "0.6.2",
+    "jaxlib": "0.6.2",
+    "python": "3.10.12",
+    "case": {
+      "molecule": "H2O",
+      "line_source": "AER 3.9",
+      "wavenumber_cm1": [
+        5000.0,
+        5100.0
+      ],
+      "atmospheric_layers": 6,
+      "spectral_lines_with_25_cm-1_margin": 4669,
+      "high_resolution_samples": 5348,
+      "detector_pixels": 2048,
+      "resolving_power": 45000
+    },
+    "forward": {
+      "compile_and_first_s": 11.07763911318034,
+      "median_ms": 5.5261594243347645,
+      "mean_ms": 5.4687440395355225,
+      "minimum_ms": 4.966157488524914,
+      "p95_ms": 5.636696703732014
+    },
+    "value_and_gradient": {
+      "compile_and_first_s": 14.084466971457005,
+      "median_ms": 9.115845430642366,
+      "mean_ms": 9.040906994293133,
+      "minimum_ms": 8.616827428340912,
+      "p95_ms": 9.265264496207237
+    },
+    "iterations": 30,
+    "x64": true,
+    "device_kind": "NVIDIA RTX 5000 Ada Generation",
+    "core_pairs": 35862
+  },
+  "differences": {
+    "flux": {
+      "maximum_absolute": 3.5299814016287456e-08,
+      "maximum_relative_nonzero": 6.19320840185482e-07
+    },
+    "gradient": {
+      "maximum_absolute": 7.534858355029428e-07,
+      "maximum_relative_nonzero": 3.1668843864078815e-06
+    }
+  }
+}

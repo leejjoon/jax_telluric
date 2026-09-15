@@ -1,0 +1,15 @@
+
+I want to develop a code that fits telluric absorptions in high resolution spectra, e.g., IGRINS and IGRINS2.
+
+lblrtm is commonly used to model telluric absorption. https://github.com/AER-RC/LBLRTM
+And I use it via python interface TelFit.
+
+What I want is jax version that functionally equivalent to lblrtm with autodiff. Because of the autodiff, I hope I can fit the observed spectrum better.
+
+There is siilar package called ExoJAX, https://github.com/HajimeKawahara/exojax
+
+I do not know if ExoJAX already does what I want to do, but surely it will be a good starting point.
+
+Research to packages and give me a plan.
+
+use uv and create a local venv.
