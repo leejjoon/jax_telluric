@@ -5,17 +5,32 @@ supplied continuum backend. The opt-in `lblrtm_corrected` mode adds a compact,
 differentiable optical-depth template generated offline by LBLRTM 12.17.
 LBLRTM is not executed during prediction or fitting.
 
-The template contains:
+The builder first uses the same pressure edges as the JAX layers and enables
+the AER/HITRAN air-pressure line shifts that ExoJAX 2.5 Direct omits. LBLRTM
+scales those shifts with density, so the JAX implementation uses
+`delta_air * (P / 1 atm) * (296 K / T)`.
+
+The resulting template contains two kinds of terms:
 
 - MT_CKD 4.3 H2O self continuum, scaled with the square of the global H2O
   column multiplier;
 - MT_CKD H2O foreign continuum, scaled linearly with H2O;
-- a line residual for every profile molecule, scaled linearly with that
-  molecule. This captures line coupling, speed-dependent line shapes, distant
-  lines absent from the local ExoJAX database, and other line-model residuals;
+- an empirical line residual for every profile molecule, scaled linearly with
+  that molecule. It is the measured difference between a species-only LBLRTM
+  run and the selected JAX backend, rather than an attribution to one physical
+  mechanism;
 - the remaining full-atmosphere LBLRTM background at the reference profile.
-  This includes unattributed non-H2O continua and interpolation residuals and
+  This includes other continua and small numerical decomposition residuals and
   is held fixed under abundance changes.
+
+For this 5000--5020 cm-1 case, CO2 line coupling is outside the AER coupling
+database's stated 597--2503 cm-1 range. LBLRTM also does not consume the AER
+speed-dependence files used by MonoRTM. Those effects therefore do not explain
+this order's correction. After fixing the profile extent, pressure shifts
+reduce the fast 99th-percentile error from 0.107 to 0.0581. The remaining
+discrepancy is concentrated in ordinary H2O and CO2 line calculations; its
+exact parameter-level cause has not been isolated, so the residual remains
+explicitly empirical.
 
 All terms are vertical optical depths. The normal model airmass calculation
 therefore scales them with zenith angle. Templates are valid only for their
@@ -55,6 +70,24 @@ model = TelluricModel(
 )
 ```
 
+The opacity backend must match the builder baseline:
+
+```python
+backend = ExoJAXOpacityBackend.prepare(
+    databases,
+    nu_grid,
+    methods="direct_sparse",
+    temperature_range_k=(profile.temperature_k.min(), profile.temperature_k.max()),
+    maximum_pressure_bar=profile.pressure_layer_bar.max(),
+    vectorize_layers=True,
+    pressure_shift=True,
+)
+```
+
+Version-2 correction files record this requirement, and model construction
+rejects an unshifted ExoJAX backend instead of silently applying the wrong
+residual.
+
 Omitting `accuracy_mode` retains the existing `fast` behavior. Generated
 templates live under ignored `data/corrections/` because they depend on the
 chosen profile, order grid, LBLRTM build, and line database.
@@ -67,32 +100,35 @@ among samples with transmission above 0.05:
 
 | Mode | Median absolute error | 99th percentile | Maximum |
 |---|---:|---:|---:|
-| Fast mixed precision | 1.653e-2 | 1.019e-1 | 7.669e-1 |
-| LBLRTM corrected | 5.68e-8 | 6.61e-5 | 1.94e-4 |
+| Fast, pressure-shifted float64 | 3.904e-3 | 5.811e-2 | 7.893e-1 |
+| LBLRTM corrected | 4.80e-8 | 4.75e-5 | 3.78e-4 |
 
 The same template was also checked against new LBLRTM runs away from its
 calibration point:
 
 | Case | Median absolute error | 99th percentile | Maximum |
 |---|---:|---:|---:|
-| H2O column 0.5x | 2.41e-4 | 8.24e-4 | 9.67e-3 |
-| H2O column 2x | 4.03e-4 | 3.09e-3 | 1.06e-2 |
-| Airmass 1.5 | 1.88e-4 | 6.44e-4 | 1.91e-3 |
-| Airmass 2.5 | 6.36e-4 | 1.88e-3 | 2.79e-3 |
+| H2O column 0.5x | 3.21e-4 | 7.24e-4 | 3.88e-3 |
+| H2O column 2x | 5.08e-4 | 1.54e-3 | 3.19e-3 |
+| Airmass 1.5 | 3.07e-4 | 7.96e-4 | 1.86e-3 |
+| Airmass 2.5 | 8.98e-4 | 2.34e-3 | 2.95e-3 |
 
 The builder requires 99th-percentile error below 1e-3 at the reference and
 below 5e-3 for these four stress cases. Individual saturated-line pixels can
 have larger errors under abundance changes, as shown by the maximum column.
 
-On the RTX 5000 Ada, the fast and corrected modes respectively measured
-2.23/2.03 ms per forward call and 3.43/3.09 ms per objective-gradient call.
-The difference is benchmark noise: adding precomputed arrays has negligible
-cost relative to opacity evaluation.
+On the RTX 5000 Ada, enabling pressure shifts changed the mixed-precision
+H2O benchmark from 1.89 to 3.88 ms per forward call and from 3.31 to 3.56 ms
+per objective-gradient call. Adding the precomputed correction arrays has
+negligible cost relative to opacity evaluation. The bounds passed during
+backend preparation must cover the fixed profile; wider bounds create more
+sparse core pairs and cost more.
 
-This test establishes reference-profile accuracy, not universal scaling under
-large abundance or pressure-temperature profile changes. The H2O and
-per-species line terms have
-explicit scaling; the unattributed background remains fixed. Regenerate the
+This test establishes calibrated, reference-profile accuracy, not universal
+physical completeness under large abundance or pressure-temperature profile
+changes. The H2O and per-species line terms have explicit scaling; the
+empirical residual need not follow that linear approximation indefinitely and
+the unattributed background remains fixed. Regenerate the
 template outside the validated 0.5--2x water or 1--2.5 airmass range, when
 changing the pressure-temperature profile, or when saturated-line accuracy
 above the tabulated level is required.

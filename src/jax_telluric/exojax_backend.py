@@ -28,8 +28,10 @@ class ExoJAXOpacityBackend:
         wavenumber_cm1,
         methods: str | Mapping[str, str] = "direct",
         temperature_range_k: tuple[float, float] | None = None,
+        maximum_pressure_bar: float = 2.0,
         vectorize_layers: bool = False,
         mixed_precision: bool = False,
+        pressure_shift: bool = False,
     ) -> "ExoJAXOpacityBackend":
         """Construct Direct, sparse-core Direct, or PreMODIT calculators.
 
@@ -37,11 +39,17 @@ class ExoJAXOpacityBackend:
         Direct for H2O (self broadening) and PreMODIT for trace gases.
         ``direct_sparse`` preserves the ExoJAX formulas but restricts expensive
         core evaluation to potentially contributing line/grid pairs. It supports
-        HITRAN-style databases; above 400 K it falls back to original Direct.
+        HITRAN-style databases; outside its configured temperature or pressure
+        bounds it falls back to a full Direct calculation.
         ``vectorize_layers=True`` reduces GPU compile time for fixed profiles.
         ``mixed_precision=True`` applies only to ``direct_sparse``: evaluate
         wings and stable wing derivative coefficients in float32 while keeping
         cores, line physics, and cross-section accumulation in float64.
+        ``pressure_shift=True`` applies HITRAN air-pressure line shifts in
+        ``direct_sparse`` calculators. It is opt-in so the default remains
+        numerically compatible with ExoJAX 2.5 Direct.
+        Supply the fixed profile's temperature range and maximum pressure to
+        keep the pressure-shifted sparse core list as compact as possible.
         """
 
         from exojax.opacity import OpaDirect, OpaPremodit
@@ -57,8 +65,18 @@ class ExoJAXOpacityBackend:
                 calculators[species] = OpaDirect(database, nu_grid=wavenumber_cm1)
             elif method == "direct_sparse":
                 from .direct import SparseCoreDirect
-                calculators[species] = SparseCoreDirect(database, wavenumber_cm1,
-                                                        mixed_precision=mixed_precision)
+                sparse_bounds = {} if temperature_range_k is None else {
+                    "minimum_temperature_k": temperature_range_k[0],
+                    "maximum_temperature_k": temperature_range_k[1],
+                }
+                calculators[species] = SparseCoreDirect(
+                    database,
+                    wavenumber_cm1,
+                    mixed_precision=mixed_precision,
+                    pressure_shift=pressure_shift,
+                    maximum_pressure_bar=maximum_pressure_bar,
+                    **sparse_bounds,
+                )
             elif method == "premodit":
                 calculators[species] = OpaPremodit(
                     database,

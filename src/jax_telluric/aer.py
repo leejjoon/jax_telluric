@@ -30,9 +30,9 @@ class AERLineDatabase:
     """Minimal HITRAN-like database backed by an AER per-molecule line file.
 
     The adapter lets :class:`exojax.opacity.OpaDirect` use the same ordinary
-    Voigt-line parameters supplied to LNFL. AER line-coupling records and
-    speed-dependent parameters remain LBLRTM-only and should be assessed as a
-    separate validation residual.
+    Voigt-line parameters supplied to LNFL. AER line-coupling records are not
+    exposed by this adapter. The auxiliary speed-dependence data are for
+    MonoRTM and are not used by the LBLRTM configuration validated here.
     """
 
     dbtype = "hitran"

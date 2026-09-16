@@ -24,13 +24,13 @@ def _optical_depth_on_grid(spectrum, target_wavenumber_cm1: np.ndarray) -> np.nd
 
 @dataclass(frozen=True)
 class LBLRTMOpticalDepthCorrection:
-    """Fixed-profile MT_CKD and line-physics corrections.
+    """Fixed-profile MT_CKD continua and empirical line corrections.
 
     The template stores vertical optical depths on the model grid. H2O self
     continuum scales quadratically with its global column scale; foreign
     continuum and per-species line residuals scale linearly. The residuals
-    include LBLRTM line coupling, speed dependence, and remaining differences
-    from the selected JAX opacity backend.
+    measure all remaining differences from the selected JAX opacity backend.
+    They must not be interpreted as one particular omitted physical effect.
     """
 
     wavenumber_cm1: np.ndarray
@@ -42,6 +42,7 @@ class LBLRTMOpticalDepthCorrection:
     water_foreign_optical_depth: np.ndarray
     reference_background_optical_depth: np.ndarray
     line_residual_optical_depth: Mapping[str, np.ndarray]
+    requires_pressure_shift: bool = False
 
     def __post_init__(self) -> None:
         nu = np.asarray(self.wavenumber_cm1, dtype=float)
@@ -103,6 +104,24 @@ class LBLRTMOpticalDepthCorrection:
             if species not in profile.vmr or not np.allclose(reference, profile.vmr[species], rtol=1e-12, atol=0.0):
                 raise ValueError(f"LBLRTM correction reference VMR does not match {species}")
 
+    def validate_opacity(self, opacity) -> None:
+        """Reject a backend incompatible with the correction's line baseline."""
+        if not self.requires_pressure_shift:
+            return
+        calculators = getattr(opacity, "calculators", None)
+        if calculators is None:
+            raise ValueError("this LBLRTM correction requires a pressure-shifted opacity backend")
+        incompatible = [
+            species for species, calculator in calculators.items()
+            if species in self.line_residual_optical_depth
+            and not getattr(calculator, "pressure_shift", False)
+        ]
+        if incompatible:
+            raise ValueError(
+                "this LBLRTM correction requires pressure_shift=True for: "
+                + ", ".join(sorted(incompatible))
+            )
+
     def _column_scale(self, species: str, scaled_vmr: Mapping[str, jnp.ndarray]) -> jnp.ndarray:
         reference = jnp.asarray(self.reference_vmr[species])
         weights = jnp.asarray(self.air_column_cm2)
@@ -129,7 +148,8 @@ class LBLRTMOpticalDepthCorrection:
     def save(self, path: str | Path) -> None:
         """Save a portable correction template."""
         values = {
-            "format_version": np.asarray(1),
+            "format_version": np.asarray(2),
+            "requires_pressure_shift": np.asarray(self.requires_pressure_shift),
             "wavenumber_cm1": self.wavenumber_cm1,
             "pressure_layer_bar": self.pressure_layer_bar,
             "temperature_k": self.temperature_k,
@@ -146,7 +166,8 @@ class LBLRTMOpticalDepthCorrection:
     def load(cls, path: str | Path) -> "LBLRTMOpticalDepthCorrection":
         """Load a correction template created by :meth:`save`."""
         with np.load(path) as values:
-            if int(values["format_version"]) != 1:
+            version = int(values["format_version"])
+            if version not in (1, 2):
                 raise ValueError("unsupported LBLRTM correction format")
             vmr = {key.split("__", 1)[1]: values[key] for key in values.files if key.startswith("reference_vmr__")}
             residual = {key.split("__", 1)[1]: values[key] for key in values.files if key.startswith("line_residual__")}
@@ -154,6 +175,7 @@ class LBLRTMOpticalDepthCorrection:
                 values["wavenumber_cm1"], values["pressure_layer_bar"], values["temperature_k"],
                 values["air_column_cm2"], vmr, values["water_self_optical_depth"],
                 values["water_foreign_optical_depth"], values["reference_background_optical_depth"], residual,
+                bool(values["requires_pressure_shift"]) if version >= 2 else False,
             )
 
 
@@ -228,5 +250,5 @@ def build_lblrtm_correction(
     return LBLRTMOpticalDepthCorrection(
         nu, profile.pressure_layer_bar, profile.temperature_k, profile.air_column_cm2,
         {species: profile.vmr[species] for species in correction_species},
-        water_self, water_foreign, background, line_residual,
+        water_self, water_foreign, background, line_residual, requires_pressure_shift=True,
     )

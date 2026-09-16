@@ -64,3 +64,34 @@ def test_mixed_wing_derivative_survives_far_wing_cancellation():
     np.testing.assert_allclose(mixed, original, rtol=2e-6, atol=1e-15)
     # A naive float32 subtraction loses the positive damping derivative here.
     assert mixed[2, 1] > 5e-9
+
+
+def test_sparse_direct_applies_hitran_air_pressure_shift():
+    database = SimpleNamespace(
+        dbtype="hitran", isotope=1, molmass=18.0,
+        nu_lines=np.array([5000.0]),
+        logsij0=jnp.log(jnp.array([1e-22])),
+        elower=np.array([100.]),
+        n_air=np.array([0.7]),
+        gamma_air=np.array([0.01]),
+        gamma_self=np.array([0.01]),
+        delta_air=np.array([0.1]),
+        A=np.array([0.1]),
+        qr_interp=lambda isotope, temperature, reference: (temperature / reference)**1.5,
+    )
+    grid = np.linspace(4999.7, 5000.3, 1201)
+    shifted = SparseCoreDirect(database, grid, pressure_shift=True)
+    at_zero_pressure = shifted.xsvector(296.0, 0.0)
+    at_one_atmosphere = shifted.xsvector(296.0, 1.01325)
+
+    zero_peak = grid[int(jnp.argmax(at_zero_pressure))]
+    pressure_peak = grid[int(jnp.argmax(at_one_atmosphere))]
+    assert zero_peak == pytest.approx(5000.0, abs=0.0005)
+    assert pressure_peak == pytest.approx(5000.1, abs=0.0005)
+    cold_half_atmosphere = shifted.xsvector(148.0, 0.506625)
+    cold_peak = grid[int(jnp.argmax(cold_half_atmosphere))]
+    assert cold_peak == pytest.approx(5000.1, abs=0.0005)
+    gradient = jax.grad(lambda pressure: jnp.sum(
+        jnp.asarray(grid) * shifted.xsvector(296.0, pressure)
+    ))(0.7)
+    assert jnp.isfinite(gradient)

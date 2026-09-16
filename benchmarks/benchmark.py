@@ -47,6 +47,7 @@ def main() -> None:
     parser.add_argument("--method", choices=("direct", "direct_sparse"), default="direct")
     parser.add_argument("--vectorize-layers", action="store_true")
     parser.add_argument("--mixed-precision", action="store_true")
+    parser.add_argument("--pressure-shift", action="store_true")
     parser.add_argument("--correction", type=Path)
     parser.add_argument("--v2", type=float, default=5020.0)
     parser.add_argument("--pixels", type=int, default=512)
@@ -85,8 +86,12 @@ def main() -> None:
         limits,
     )
     backend = ExoJAXOpacityBackend.prepare({"H2O": database}, nu_grid, methods=args.method,
+                                         temperature_range_k=(float(np.min(profile.temperature_k)),
+                                                              float(np.max(profile.temperature_k))),
+                                         maximum_pressure_bar=float(np.max(profile.pressure_layer_bar)),
                                          vectorize_layers=args.vectorize_layers,
-                                         mixed_precision=args.mixed_precision)
+                                         mixed_precision=args.mixed_precision,
+                                         pressure_shift=args.pressure_shift)
     correction = None if args.correction is None else LBLRTMOpticalDepthCorrection.load(args.correction)
     model = TelluricModel(
         profile,
@@ -122,6 +127,7 @@ def main() -> None:
         "method": args.method,
         "vectorize_layers": args.vectorize_layers,
         "mixed_precision": args.mixed_precision,
+        "pressure_shift": args.pressure_shift,
         "accuracy_mode": model.accuracy_mode,
         "device": str(jax.devices()[0]),
         "jax": jax.__version__,

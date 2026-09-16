@@ -89,11 +89,18 @@ The extended checks pass, including paired mixed-precision and float64 fits.
 
 The default `accuracy_mode="fast"` preserves the optimized behavior above.
 For a fixed atmospheric profile and order grid, an offline LBLRTM correction
-template can add MT_CKD H2O continuum, line coupling, speed-dependent line
-shape residuals, distant-line absorption, and the remaining reference
-background while retaining JAX derivatives during fitting:
+template can add MT_CKD H2O continuum, remaining continua, and empirical
+per-species differences from LBLRTM while retaining JAX derivatives during
+fitting. Prepare its sparse Direct backend with the same pressure-shift option
+used by the builder:
 
 ```python
+backend = ExoJAXOpacityBackend.prepare(
+    databases, nu_grid, methods="direct_sparse", vectorize_layers=True,
+    temperature_range_k=(profile.temperature_k.min(), profile.temperature_k.max()),
+    maximum_pressure_bar=profile.pressure_layer_bar.max(),
+    pressure_shift=True,
+)
 correction = LBLRTMOpticalDepthCorrection.load("data/corrections/order.npz")
 model = TelluricModel(
     profile, nu_grid, backend,
@@ -103,6 +110,7 @@ model = TelluricModel(
 
 Generate a template with `scripts/build_lblrtm_correction.py`. In the tested
 5000--5020 cm-1 order, the correction reduced the 99th-percentile absolute
-error against full LBLRTM from 0.102 to 6.61e-5 with negligible steady-state
-GPU overhead. See [the corrected-mode guide](docs/lblrtm_corrected_mode.md)
+error against full LBLRTM from 0.0581 to 4.75e-5. The correction arrays have
+negligible overhead; the pressure-shifted GPU forward path costs about 2 ms
+more in the measured order. See [the corrected-mode guide](docs/lblrtm_corrected_mode.md)
 for usage, assumptions, and reproduction.

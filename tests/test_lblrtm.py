@@ -27,6 +27,11 @@ def test_tape5_writer_uses_requested_range_profile_and_continuum(tmp_path):
     assert float(lines[2][:10]) == 5000.0
     assert float(lines[2][10:20]) == 5100.0
     assert any("AAAAAAA" in line for line in lines)
+    level_count = int(lines[7][:5])
+    level_records = lines[8 : 8 + 2 * level_count : 2]
+    pressures_hpa = np.asarray([float(line[10:20]) for line in level_records])
+    assert level_count == len(profile.temperature_k) + 1
+    np.testing.assert_allclose(pressures_hpa[[0, -1]], [800.0, 10.0])
     assert lines[-1] == "%"
 
 

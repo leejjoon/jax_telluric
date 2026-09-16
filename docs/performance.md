@@ -15,10 +15,22 @@ Compile + first call took 11.1 s forward and 14.1 s for value + gradient.
 Raw measurements and accuracy metrics are in `docs/mixed_precision_results.json`.
 
 The optional [LBLRTM-corrected mode](lblrtm_corrected_mode.md) adds
-precomputed MT_CKD and line-physics residuals. On the 20 cm-1 mixed-precision
-GPU case, its forward and objective-gradient medians were 2.03 and 3.09 ms,
-versus 2.23 and 3.43 ms in fast mode. The apparent improvement is timing
-noise; correction overhead is negligible relative to opacity evaluation.
+precomputed MT_CKD and empirical line residuals. Adding those arrays has
+negligible cost relative to opacity evaluation. Its pressure-shifted opacity
+baseline has a separate, measured cost because line coordinates become
+layer-dependent:
+
+| Platform and operation | Unshifted | Pressure shifted | Ratio |
+|---|---:|---:|---:|
+| CPU forward | 100.9 ms | 96.6 ms | 0.96x |
+| CPU objective + gradient | 148.4 ms | 153.1 ms | 1.03x |
+| GPU forward | 1.89 ms | 3.88 ms | 2.06x |
+| GPU objective + gradient | 3.31 ms | 3.56 ms | 1.08x |
+
+These paired runs use the fixed profile's actual temperature and pressure
+bounds, 10 CPU iterations, and 30 GPU iterations. The CPU forward difference
+is benchmark noise. On the GPU, dynamic line coordinates add about 2 ms to a
+forward call; the objective-gradient cost rises by about 0.25 ms.
 
 **Accuracy versus float64:** across three H2O scales (exp(-0.7), 1,
 exp(0.7)), maximum absolute flux difference was 3.53e-8. Maximum absolute

@@ -155,6 +155,32 @@ def test_lblrtm_corrected_mode_requires_matching_correction():
         TelluricModel(model.profile, nu, model.opacity, accuracy_mode="unknown")
 
 
+def test_pressure_shifted_correction_rejects_unshifted_backend(tmp_path):
+    model, nu = make_model()
+    samples = len(nu)
+    correction = LBLRTMOpticalDepthCorrection(
+        wavenumber_cm1=nu,
+        pressure_layer_bar=model.profile.pressure_layer_bar,
+        temperature_k=model.profile.temperature_k,
+        air_column_cm2=model.profile.air_column_cm2,
+        reference_vmr=model.profile.vmr,
+        water_self_optical_depth=np.zeros(samples),
+        water_foreign_optical_depth=np.zeros(samples),
+        reference_background_optical_depth=np.zeros(samples),
+        line_residual_optical_depth={"H2O": np.zeros(samples)},
+        requires_pressure_shift=True,
+    )
+    path = tmp_path / "shifted.npz"
+    correction.save(path)
+    loaded = LBLRTMOpticalDepthCorrection.load(path)
+    assert loaded.requires_pressure_shift
+    with np.testing.assert_raises_regex(ValueError, "pressure-shifted opacity backend"):
+        TelluricModel(
+            model.profile, nu, model.opacity,
+            accuracy_mode="lblrtm_corrected", correction=loaded,
+        )
+
+
 
 def test_prediction_applies_lsf_sampling_and_positive_continuum():
     model, nu = make_model()

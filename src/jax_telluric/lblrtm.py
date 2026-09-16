@@ -14,6 +14,40 @@ from .types import AtmosphereProfile
 
 
 _LBLRTM_SPECIES = ("H2O", "CO2", "O3", "N2O", "CO", "CH4", "O2")
+_GAS_CONSTANT_J_MOL_K = 8.314462618
+
+
+def _layer_values_at_edges(values: np.ndarray) -> np.ndarray:
+    """Choose edge values whose adjacent means reproduce layer values."""
+    layer = np.asarray(values, dtype=float)
+    edge = np.empty(len(layer) + 1)
+    edge[0] = layer[0]
+    for index, value in enumerate(layer):
+        edge[index + 1] = 2.0 * value - edge[index]
+    if np.any(edge < 0.0):
+        # Some sharply non-monotonic profiles cannot have nonnegative edge
+        # values with every adjacent mean exact. Interpolation is safer than
+        # emitting negative molecular abundances into LBLRTM.
+        centers = np.arange(len(layer), dtype=float) + 0.5
+        edge = np.interp(np.arange(len(layer) + 1), centers, layer)
+    return edge
+
+
+def _hydrostatic_altitude_edges(profile: AtmosphereProfile) -> np.ndarray:
+    """Derive top-to-bottom altitude edges from the same pressure layers."""
+    pressure = np.asarray(profile.pressure_edges_bar)
+    temperature = np.asarray(profile.temperature_k)
+    molar_mass = np.asarray(profile.mean_molecular_weight_g_mol) * 1.0e-3
+    gravity = np.asarray(profile.gravity_m_s2)
+    thickness_km = (
+        _GAS_CONSTANT_J_MOL_K * temperature / (molar_mass * gravity)
+        * np.log(pressure[1:] / pressure[:-1]) / 1000.0
+    )
+    altitude = np.empty(len(pressure))
+    altitude[-1] = float(np.asarray(profile.altitude_km)[-1])
+    for index in range(len(thickness_km) - 1, -1, -1):
+        altitude[index] = altitude[index + 1] + thickness_km[index]
+    return altitude
 
 
 @dataclass(frozen=True)
@@ -42,9 +76,10 @@ def write_tape5(
 ) -> None:
     """Write a fixed-format TAPE5 for an atmospheric transmission run.
 
-    The layer-center pressure, temperature, altitude, and VMR values are used
-    as LBLRTM user-profile levels. LBLRTM interpolates those levels to its path
-    layers. Abundances use the ``A`` unit code (ppmv by volume).
+    Pressure and altitude edges define the same hydrostatic path used by the
+    JAX model. Edge temperature and VMR values are reconstructed so adjacent
+    means reproduce the supplied layer values. Abundances use the ``A`` unit
+    code (ppmv by volume).
     """
 
     available = set(profile.vmr)
@@ -52,15 +87,18 @@ def write_tape5(
     if unsupported:
         raise ValueError(f"unsupported LBLRTM TAPE3 species: {', '.join(sorted(unsupported))}")
     nlayers = len(profile.temperature_k)
-    if nlayers < 2:
-        raise ValueError("LBLRTM user profiles need at least two levels")
+    if nlayers < 1:
+        raise ValueError("LBLRTM user profiles need at least one layer")
 
     # LBLRTM expects user profile levels from the observer upward.
-    altitude = np.asarray(profile.altitude_km)[::-1]
-    pressure_hpa = np.asarray(profile.pressure_layer_bar)[::-1] * 1000.0
-    temperature = np.asarray(profile.temperature_k)[::-1]
+    altitude = _hydrostatic_altitude_edges(profile)[::-1]
+    pressure_hpa = np.asarray(profile.pressure_edges_bar)[::-1] * 1000.0
+    temperature = _layer_values_at_edges(profile.temperature_k)[::-1]
     abundance_ppmv = np.column_stack(
-        [np.asarray(profile.vmr.get(name, np.zeros(nlayers)))[::-1] * 1.0e6 for name in _LBLRTM_SPECIES]
+        [
+            _layer_values_at_edges(profile.vmr.get(name, np.zeros(nlayers)))[::-1] * 1.0e6
+            for name in _LBLRTM_SPECIES
+        ]
     )
     observer_altitude = float(altitude[0])
     space_altitude = float(altitude[-1])
@@ -89,7 +127,8 @@ def write_tape5(
         f"{0.0:10.3f}{0.0:10.3f}{0:5d}{'':5s}{observer_altitude:10.3f}"
     )
     lines.append(f"{0.0:10.3f}{0.0:10.3f}{0.0:10.3f}{observer_altitude:10.3f}{space_altitude:10.3f}")
-    lines.append(f"{nlayers:5d}{' jax-telluric profile':24s}")
+    nlevels = nlayers + 1
+    lines.append(f"{nlevels:5d}{' jax-telluric profile':24s}")
     for z_km, pressure, temp, abundances in zip(altitude, pressure_hpa, temperature, abundance_ppmv):
         lines.append(f"{z_km:10.3E}{pressure:10.3E}{temp:10.3E}     AA L AAAAAAA")
         lines.append("".join(f"{value:15.8E}" for value in abundances))

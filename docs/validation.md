@@ -43,10 +43,11 @@ fixture where possible.
 
 An optional fixed-profile implementation now covers the correction ladder for
 the 5000--5020 cm-1 example order. `scripts/build_lblrtm_correction.py`
-isolates H2O self/foreign continua and per-species LBLRTM line residuals, then
-stores the remaining reference background. Its corrected 99th-percentile
-absolute error is 6.61e-5. Checks at 0.5--2x water abundance and airmass
-1--2.5 remain below 3.10e-3 at the 99th percentile. This validates that
+isolates H2O self/foreign continua and empirical per-species LBLRTM line
+residuals, then stores the remaining reference background. The builder uses
+LBLRTM-compatible pressure shifts in its JAX baseline. Its corrected
+99th-percentile absolute error is 4.75e-5. Checks at 0.5--2x water abundance
+and airmass 1--2.5 remain below 2.34e-3 at the 99th percentile. This validates that
 profile and grid; broader pressure-temperature and wavelength coverage
 remains future work.
 

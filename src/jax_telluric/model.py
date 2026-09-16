@@ -159,6 +159,9 @@ class TelluricModel:
             raise ValueError("LBLRTM corrections already include the H2O continuum")
         if correction is not None:
             correction.validate(profile, nu)
+            validate_opacity = getattr(correction, "validate_opacity", None)
+            if validate_opacity is not None:
+                validate_opacity(opacity)
         self.profile = profile
         self.wavenumber_cm1 = jnp.asarray(nu)
         self.opacity = opacity

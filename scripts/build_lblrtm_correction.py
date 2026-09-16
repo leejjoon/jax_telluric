@@ -54,7 +54,14 @@ def main() -> None:
             if not str(exc).startswith(f"no {species} lines found"):
                 raise
     opacity = ExoJAXOpacityBackend.prepare(
-        databases, grid, methods="direct_sparse", vectorize_layers=True, mixed_precision=False
+        databases,
+        grid,
+        methods="direct_sparse",
+        temperature_range_k=(float(np.min(profile.temperature_k)), float(np.max(profile.temperature_k))),
+        maximum_pressure_bar=float(np.max(profile.pressure_layer_bar)),
+        vectorize_layers=True,
+        mixed_precision=False,
+        pressure_shift=True,
     )
     correction = build_lblrtm_correction(
         reference / "run_corrections",
@@ -170,7 +177,7 @@ def main() -> None:
         raise RuntimeError("generated correction missed its LBLRTM agreement thresholds")
 
     metadata = {
-        "format": 1,
+        "format": 2,
         "lblrtm": "12.17",
         "mt_ckd": "4.3",
         "aer_line_file": "3.9",
