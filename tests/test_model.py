@@ -146,11 +146,24 @@ def test_lblrtm_corrected_mode_scales_continuum_and_line_residuals(tmp_path):
     )(jnp.asarray(np.log(scale)))
     assert jnp.isfinite(derivative)
 
+    physics = TelluricModel(
+        model.profile, nu, model.opacity,
+        accuracy_mode="mt_ckd", correction=correction,
+    )
+    physics_tau = -np.log(np.asarray(physics.transmission(parameters)))
+    expected_mt_ckd = 0.01 * scale**2 + 0.02 * scale
+    np.testing.assert_allclose(
+        physics_tau - fast_tau, expected_mt_ckd, rtol=2e-12, atol=2e-12
+    )
+    assert physics.species == model.opacity.species
+
 
 def test_lblrtm_corrected_mode_requires_matching_correction():
     model, nu = make_model()
     with np.testing.assert_raises(ValueError):
         TelluricModel(model.profile, nu, model.opacity, accuracy_mode="lblrtm_corrected")
+    with np.testing.assert_raises(ValueError):
+        TelluricModel(model.profile, nu, model.opacity, accuracy_mode="mt_ckd")
     with np.testing.assert_raises(ValueError):
         TelluricModel(model.profile, nu, model.opacity, accuracy_mode="unknown")
 

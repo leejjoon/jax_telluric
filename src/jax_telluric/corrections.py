@@ -89,8 +89,7 @@ class LBLRTMOpticalDepthCorrection:
         object.__setattr__(self, "reference_background_optical_depth", background_tau)
         object.__setattr__(self, "line_residual_optical_depth", residual)
 
-    def validate(self, profile: AtmosphereProfile, wavenumber_cm1: np.ndarray) -> None:
-        """Reject use with a profile or spectral grid other than its reference."""
+    def _validate_structure(self, profile, wavenumber_cm1) -> None:
         checks = (
             (self.wavenumber_cm1, np.asarray(wavenumber_cm1)),
             (self.pressure_layer_bar, profile.pressure_layer_bar),
@@ -100,9 +99,21 @@ class LBLRTMOpticalDepthCorrection:
         if any(left.shape != right.shape or not np.allclose(left, right, rtol=1e-12, atol=0.0)
                for left, right in checks):
             raise ValueError("LBLRTM correction does not match the model grid and atmospheric profile")
+
+    def validate(self, profile: AtmosphereProfile, wavenumber_cm1: np.ndarray) -> None:
+        """Reject full correction use outside its reference profile and grid."""
+        self._validate_structure(profile, wavenumber_cm1)
         for species, reference in self.reference_vmr.items():
             if species not in profile.vmr or not np.allclose(reference, profile.vmr[species], rtol=1e-12, atol=0.0):
                 raise ValueError(f"LBLRTM correction reference VMR does not match {species}")
+
+    def validate_mt_ckd(self, profile: AtmosphereProfile, wavenumber_cm1: np.ndarray) -> None:
+        """Validate only the profile fields used by the isolated H2O continua."""
+        self._validate_structure(profile, wavenumber_cm1)
+        if ("H2O" not in profile.vmr
+                or not np.allclose(self.reference_vmr["H2O"], profile.vmr["H2O"],
+                                   rtol=1e-12, atol=0.0)):
+            raise ValueError("LBLRTM correction reference VMR does not match H2O")
 
     def validate_opacity(self, opacity) -> None:
         """Reject a backend incompatible with the correction's line baseline."""
@@ -133,12 +144,22 @@ class LBLRTMOpticalDepthCorrection:
         """Molecules represented by the LBLRTM line-residual templates."""
         return tuple(self.line_residual_optical_depth)
 
-    def optical_depth(self, profile, scaled_vmr):
+    def _mt_ckd_total(self, scaled_vmr):
         h2o_scale = self._column_scale("H2O", scaled_vmr)
-        total = (
-            jnp.asarray(self.reference_background_optical_depth)
-            + jnp.asarray(self.water_self_optical_depth) * h2o_scale**2
+        return (
+            jnp.asarray(self.water_self_optical_depth) * h2o_scale**2
             + jnp.asarray(self.water_foreign_optical_depth) * h2o_scale
+        )
+
+    def mt_ckd_optical_depth(self, profile, scaled_vmr):
+        """Return only the isolated H2O self and foreign MT_CKD terms."""
+        total = self._mt_ckd_total(scaled_vmr)
+        layers = jnp.zeros((len(profile.temperature_k), total.size), dtype=total.dtype)
+        return layers.at[0].set(total)
+
+    def optical_depth(self, profile, scaled_vmr):
+        total = self._mt_ckd_total(scaled_vmr) + jnp.asarray(
+            self.reference_background_optical_depth
         )
         for species, residual in self.line_residual_optical_depth.items():
             total = total + jnp.asarray(residual) * self._column_scale(species, scaled_vmr)

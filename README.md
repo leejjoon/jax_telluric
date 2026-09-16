@@ -85,7 +85,7 @@ and [extended accuracy validation](docs/mixed_precision_validation.md) for
 multi-species, atmospheric-state, spectral-derivative, and fit-recovery checks.
 The extended checks pass, including paired mixed-precision and float64 fits.
 
-## Optional LBLRTM-corrected mode
+## Optional pressure shifts, MT_CKD, and LBLRTM correction
 
 The default `accuracy_mode="fast"` preserves the optimized behavior above.
 For a fixed atmospheric profile and order grid, an offline LBLRTM correction
@@ -104,9 +104,15 @@ backend = ExoJAXOpacityBackend.prepare(
 correction = LBLRTMOpticalDepthCorrection.load("data/corrections/order.npz")
 model = TelluricModel(
     profile, nu_grid, backend,
-    accuracy_mode="lblrtm_corrected", correction=correction,
+    accuracy_mode="mt_ckd", correction=correction,
 )
 ```
+
+`mt_ckd` applies only the physics-derived H2O self and foreign continua. Use
+`accuracy_mode="lblrtm_corrected"` with the same template to additionally add
+the profile-calibrated line residuals and fixed background. In the tested
+order, MT_CKD alone changed the 99th-percentile LBLRTM error from 0.0581 to
+0.0569; the remaining line mismatch dominates.
 
 Generate a template with `scripts/build_lblrtm_correction.py`. In the tested
 5000--5020 cm-1 order, the correction reduced the 99th-percentile absolute

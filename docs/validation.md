@@ -51,6 +51,12 @@ and airmass 1--2.5 remain below 2.34e-3 at the 99th percentile. This validates t
 profile and grid; broader pressure-temperature and wavelength coverage
 remains future work.
 
+`accuracy_mode="mt_ckd"` applies only the isolated physical H2O self and
+foreign continua. Its reference 99th-percentile error is 0.0569 versus 0.0581
+for pressure-shifted lines alone. `lblrtm_corrected` is required for the much
+closer agreement above because ordinary H2O and CO2 line residuals dominate
+this interval.
+
 Use a water-dominated H interval and a mixed-species K interval. Within pixels
 whose reference transmission exceeds 0.05, require median absolute error below
 `1e-3`, 99th-percentile error below `5e-3`, and line-center displacement below

@@ -49,6 +49,11 @@ def main() -> None:
     parser.add_argument("--mixed-precision", action="store_true")
     parser.add_argument("--pressure-shift", action="store_true")
     parser.add_argument("--correction", type=Path)
+    parser.add_argument(
+        "--correction-mode",
+        choices=("mt_ckd", "lblrtm_corrected"),
+        default="lblrtm_corrected",
+    )
     parser.add_argument("--v2", type=float, default=5020.0)
     parser.add_argument("--pixels", type=int, default=512)
     args = parser.parse_args()
@@ -97,7 +102,7 @@ def main() -> None:
         profile,
         nu_grid,
         backend,
-        accuracy_mode="fast" if correction is None else "lblrtm_corrected",
+        accuracy_mode="fast" if correction is None else args.correction_mode,
         correction=correction,
     )
     wavelength = np.linspace(1.0e7 / limits[1], 1.0e7 / limits[0], args.pixels)

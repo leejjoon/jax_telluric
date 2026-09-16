@@ -107,6 +107,10 @@ def main() -> None:
     )
     fast_model = TelluricModel(profile, grid, opacity)
     fast_transmission = np.asarray(fast_model.transmission(parameters))
+    mt_ckd_model = TelluricModel(
+        profile, grid, opacity, accuracy_mode="mt_ckd", correction=loaded
+    )
+    mt_ckd_transmission = np.asarray(mt_ckd_model.transmission(parameters))
     corrected_transmission = np.asarray(value)
     keep = reference_transmission > 0.05
 
@@ -119,6 +123,7 @@ def main() -> None:
         }
 
     fast_error = error_summary(fast_transmission)
+    mt_ckd_error = error_summary(mt_ckd_transmission)
     corrected_error = error_summary(corrected_transmission)
     if corrected_error["median_absolute"] >= fast_error["median_absolute"]:
         raise RuntimeError("LBLRTM correction did not improve median agreement")
@@ -186,6 +191,7 @@ def main() -> None:
         "correction_grid_cm1": [float(grid[0]), float(grid[-1]), len(grid)],
         "species": list(species),
         "reference_error_fast": fast_error,
+        "reference_error_mt_ckd": mt_ckd_error,
         "reference_error_corrected": corrected_error,
         "h2o_scale_validation": h2o_scale_validation,
         "airmass_validation": airmass_validation,

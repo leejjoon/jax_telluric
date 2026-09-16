@@ -69,6 +69,10 @@ class CorrectionBackend(Protocol):
         self, profile: AtmosphereProfile, scaled_vmr: Mapping[str, jnp.ndarray]
     ) -> jnp.ndarray: ...
 
+    def mt_ckd_optical_depth(
+        self, profile: AtmosphereProfile, scaled_vmr: Mapping[str, jnp.ndarray]
+    ) -> jnp.ndarray: ...
+
 
 @dataclass(frozen=True)
 class ArrayOpacityBackend:
@@ -149,23 +153,29 @@ class TelluricModel:
             raise ValueError("wavenumber grid must be evenly spaced in log wavenumber")
         if set(opacity.species) - set(profile.vmr):
             raise ValueError("the atmosphere has no VMR profile for an opacity species")
-        if accuracy_mode not in ("fast", "lblrtm_corrected"):
-            raise ValueError("accuracy_mode must be 'fast' or 'lblrtm_corrected'")
+        if accuracy_mode not in ("fast", "mt_ckd", "lblrtm_corrected"):
+            raise ValueError("accuracy_mode must be 'fast', 'mt_ckd', or 'lblrtm_corrected'")
         if accuracy_mode == "fast" and correction is not None:
-            raise ValueError("a correction requires accuracy_mode='lblrtm_corrected'")
-        if accuracy_mode == "lblrtm_corrected" and correction is None:
-            raise ValueError("accuracy_mode='lblrtm_corrected' requires a correction template")
-        if accuracy_mode == "lblrtm_corrected" and continuum is not None:
-            raise ValueError("LBLRTM corrections already include the H2O continuum")
+            raise ValueError("a correction requires accuracy_mode='mt_ckd' or 'lblrtm_corrected'")
+        if accuracy_mode != "fast" and correction is None:
+            raise ValueError(f"accuracy_mode='{accuracy_mode}' requires a correction template")
+        if accuracy_mode != "fast" and continuum is not None:
+            raise ValueError("the selected LBLRTM mode already includes the H2O continuum")
         if correction is not None:
-            correction.validate(profile, nu)
-            validate_opacity = getattr(correction, "validate_opacity", None)
-            if validate_opacity is not None:
-                validate_opacity(opacity)
+            if accuracy_mode == "mt_ckd":
+                validate_mt_ckd = getattr(correction, "validate_mt_ckd", None)
+                if validate_mt_ckd is None or not hasattr(correction, "mt_ckd_optical_depth"):
+                    raise TypeError("mt_ckd mode requires an MT_CKD correction template")
+                validate_mt_ckd(profile, nu)
+            else:
+                correction.validate(profile, nu)
+                validate_opacity = getattr(correction, "validate_opacity", None)
+                if validate_opacity is not None:
+                    validate_opacity(opacity)
         self.profile = profile
         self.wavenumber_cm1 = jnp.asarray(nu)
         self.opacity = opacity
-        correction_species = () if correction is None else correction.species
+        correction_species = correction.species if accuracy_mode == "lblrtm_corrected" else ()
         self.species = tuple(dict.fromkeys((*opacity.species, *correction_species)))
         self.continuum = continuum
         self.accuracy_mode = accuracy_mode
@@ -193,7 +203,10 @@ class TelluricModel:
         if self.continuum is not None:
             tau = tau + self.continuum.optical_depth(self.profile, vmr_scaled)
         if self.correction is not None:
-            tau = tau + self.correction.optical_depth(self.profile, vmr_scaled)
+            if self.accuracy_mode == "mt_ckd":
+                tau = tau + self.correction.mt_ckd_optical_depth(self.profile, vmr_scaled)
+            else:
+                tau = tau + self.correction.optical_depth(self.profile, vmr_scaled)
         for species in self.opacity.species:
             tau = tau + xs[species] * (air_column * vmr_scaled[species])[:, None]
         mu = jnp.cos(jnp.deg2rad(zenith_angle_deg))

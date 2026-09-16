@@ -1,8 +1,13 @@
-# Optional LBLRTM-corrected mode
+# Optional MT_CKD and LBLRTM-corrected modes
 
 The default `fast` mode evaluates ExoJAX/AER Voigt lines and any explicitly
-supplied continuum backend. The opt-in `lblrtm_corrected` mode adds a compact,
-differentiable optical-depth template generated offline by LBLRTM 12.17.
+supplied continuum backend. Two opt-in modes consume a compact, differentiable
+optical-depth template generated offline by LBLRTM 12.17:
+
+- `mt_ckd` adds only the isolated H2O self and foreign MT_CKD continua;
+- `lblrtm_corrected` adds those continua plus empirical per-species line
+  residuals and the fixed reference background.
+
 LBLRTM is not executed during prediction or fitting.
 
 The builder first uses the same pressure edges as the JAX layers and enables
@@ -55,22 +60,7 @@ continuum-free LBLRTM calculation per profile molecule. It saves a compressed
 template and provenance JSON, reloads the result, checks first derivatives,
 and measures fast and corrected transmission against full LBLRTM.
 
-```python
-from jax_telluric import LBLRTMOpticalDepthCorrection, TelluricModel
-
-correction = LBLRTMOpticalDepthCorrection.load(
-    "data/corrections/lblrtm_5000_5020.npz"
-)
-model = TelluricModel(
-    profile,
-    nu_grid,
-    opacity_backend,
-    accuracy_mode="lblrtm_corrected",
-    correction=correction,
-)
-```
-
-The opacity backend must match the builder baseline:
+To enable line shifts, prepare the opacity backend with `pressure_shift=True`:
 
 ```python
 backend = ExoJAXOpacityBackend.prepare(
@@ -84,11 +74,35 @@ backend = ExoJAXOpacityBackend.prepare(
 )
 ```
 
-Version-2 correction files record this requirement, and model construction
-rejects an unshifted ExoJAX backend instead of silently applying the wrong
-residual.
+Then select the continuum-only mode:
 
-Omitting `accuracy_mode` retains the existing `fast` behavior. Generated
+```python
+from jax_telluric import LBLRTMOpticalDepthCorrection, TelluricModel
+
+correction = LBLRTMOpticalDepthCorrection.load(
+    "data/corrections/lblrtm_5000_5020.npz"
+)
+model = TelluricModel(
+    profile,
+    nu_grid,
+    backend,
+    accuracy_mode="mt_ckd",
+    correction=correction,
+)
+```
+
+Change the mode to `lblrtm_corrected` when the calibrated residual terms are
+desired. The same correction file supports both modes.
+
+Version-2 correction files record the line baseline used to derive their
+empirical residuals. Full corrected-mode construction rejects an unshifted
+ExoJAX backend instead of silently applying the wrong residual. The `mt_ckd`
+terms are independent of that line baseline, so they can also be combined
+with another opacity backend.
+
+Omitting `accuracy_mode` retains the existing `fast` behavior. The `mt_ckd`
+mode does not add `reference_background_optical_depth` or any
+`line_residual_optical_depth` arrays. Generated
 templates live under ignored `data/corrections/` because they depend on the
 chosen profile, order grid, LBLRTM build, and line database.
 
@@ -101,7 +115,16 @@ among samples with transmission above 0.05:
 | Mode | Median absolute error | 99th percentile | Maximum |
 |---|---:|---:|---:|
 | Fast, pressure-shifted float64 | 3.904e-3 | 5.811e-2 | 7.893e-1 |
+| Pressure shifts + MT_CKD only | 5.607e-3 | 5.689e-2 | 7.879e-1 |
 | LBLRTM corrected | 4.80e-8 | 4.75e-5 | 3.78e-4 |
+
+MT_CKD slightly improves the 99th-percentile error but increases the median
+in this order. The dominant JAX line residual is signed and partially cancels
+the positive continuum opacity in the fast comparison. Adding a known
+continuum therefore need not improve every aggregate agreement metric while
+the ordinary H2O and CO2 line mismatch remains. The `mt_ckd` mode is the
+physically attributable option; `lblrtm_corrected` is the close LBLRTM
+emulator.
 
 The same template was also checked against new LBLRTM runs away from its
 calibration point:
