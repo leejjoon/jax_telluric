@@ -19,6 +19,32 @@ UV_CACHE_DIR=.uv-cache uv run pytest
 JAX runs in 64-bit mode inside this package. Database downloads and LBLRTM
 binaries belong under the ignored `data/` directories.
 
+After installing from PyPI or GitHub, download only the runtime data you need:
+
+```bash
+# Small MT_CKD 4.3 coefficient file
+jax-telluric-download-data mt-ckd
+
+# AER line file 3.9 (approximately 406 MB compressed)
+jax-telluric-download-data aer-lines
+
+# Or both
+jax-telluric-download-data all
+```
+
+The default location is `$JAX_TELLURIC_DATA`, when set, or
+`~/.local/share/jax-telluric`. Use `--output /path/to/data` to choose another
+location. Downloads use version-pinned official AER sources and are verified
+with SHA-256 before use. The line archive is extracted with path and file-type
+checks.
+
+The resulting runtime paths are:
+
+```text
+~/.local/share/jax-telluric/mt_ckd/absco-ref_wv-mt-ckd.nc
+~/.local/share/jax-telluric/aer_v_3.9/line_files_By_Molecule/
+```
+
 To reproduce the reference compilers, builds, and line-file download:
 
 ```bash
@@ -92,10 +118,10 @@ For runtime MT_CKD 4.3 physics across pressure-temperature profiles, load the
 official coefficient file distributed with LBLRTM:
 
 ```python
-from jax_telluric import MTCKDWaterContinuum, TelluricModel
+from jax_telluric import MTCKDWaterContinuum, TelluricModel, default_data_directory
 
 continuum = MTCKDWaterContinuum.from_netcdf(
-    "data/lblrtm/LBLRTM/data/absco-ref_wv-mt-ckd.nc", nu_grid
+    default_data_directory() / "mt_ckd/absco-ref_wv-mt-ckd.nc", nu_grid
 )
 model = TelluricModel(
     profile, nu_grid, backend,

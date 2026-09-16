@@ -8,6 +8,7 @@ from .fit import FitResult, fit_order
 from .corrections import LBLRTMOpticalDepthCorrection, build_lblrtm_correction
 from .aer import AERLineDatabase
 from .exojax_backend import ExoJAXOpacityBackend
+from .download import default_data_directory, download_aer_lines, download_mt_ckd
 from .io import load_atmosphere_csv, load_mipas_profile
 from .lblrtm import LBLRTMRunConfig, run_lblrtm, write_tape5
 from .mt_ckd import MTCKDWaterContinuum
@@ -42,6 +43,9 @@ __all__ = [
     "TelluricParameters",
     "ValidationMetrics",
     "compare_transmission",
+    "default_data_directory",
+    "download_aer_lines",
+    "download_mt_ckd",
     "build_lblrtm_correction",
     "degrade_to_resolving_power",
     "fit_order",
