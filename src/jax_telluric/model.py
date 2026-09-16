@@ -157,10 +157,14 @@ class TelluricModel:
             raise ValueError("accuracy_mode must be 'fast', 'mt_ckd', or 'lblrtm_corrected'")
         if accuracy_mode == "fast" and correction is not None:
             raise ValueError("a correction requires accuracy_mode='mt_ckd' or 'lblrtm_corrected'")
-        if accuracy_mode != "fast" and correction is None:
-            raise ValueError(f"accuracy_mode='{accuracy_mode}' requires a correction template")
-        if accuracy_mode != "fast" and continuum is not None:
-            raise ValueError("the selected LBLRTM mode already includes the H2O continuum")
+        if accuracy_mode == "lblrtm_corrected" and correction is None:
+            raise ValueError("accuracy_mode='lblrtm_corrected' requires a correction template")
+        if accuracy_mode == "lblrtm_corrected" and continuum is not None:
+            raise ValueError("LBLRTM-corrected mode already includes the H2O continuum")
+        if accuracy_mode == "mt_ckd" and (continuum is None) == (correction is None):
+            raise ValueError(
+                "accuracy_mode='mt_ckd' requires exactly one continuum backend or correction template"
+            )
         if correction is not None:
             if accuracy_mode == "mt_ckd":
                 validate_mt_ckd = getattr(correction, "validate_mt_ckd", None)
@@ -177,7 +181,8 @@ class TelluricModel:
         self.opacity = opacity
         correction_species = correction.species if accuracy_mode == "lblrtm_corrected" else ()
         self.species = tuple(dict.fromkeys((*opacity.species, *correction_species)))
-        self.continuum = continuum
+        bind_continuum = getattr(continuum, "bind", None)
+        self.continuum = bind_continuum(profile) if bind_continuum is not None else continuum
         self.accuracy_mode = accuracy_mode
         self.correction = correction
         self.velocity_step_kms = float(dlog[0] * _C_KMS)

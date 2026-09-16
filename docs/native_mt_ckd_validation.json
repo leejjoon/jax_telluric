@@ -1,0 +1,65 @@
+{
+  "lblrtm": "12.17",
+  "mt_ckd": "4.3",
+  "wavenumber_cm1": [
+    5000.0,
+    5020.0
+  ],
+  "method": "difference of LBLRTM continuum flags 1 and 4",
+  "cases": [
+    {
+      "name": "cold_low_pressure",
+      "pressure_edges_bar": [
+        0.05,
+        0.2
+      ],
+      "temperature_k": 225.0,
+      "h2o_vmr": 0.002,
+      "samples": 13638,
+      "reference_optical_depth_range": [
+        0.0001547700969615805,
+        0.0002150019819265225
+      ],
+      "median_relative_error": 0.00023851577677680072,
+      "percentile_99_relative_error": 0.0010736885651609451,
+      "maximum_relative_error": 0.0020485065941668267,
+      "maximum_absolute_error": 3.8252043587180427e-07
+    },
+    {
+      "name": "temperate_mid_pressure",
+      "pressure_edges_bar": [
+        0.3,
+        0.6
+      ],
+      "temperature_k": 255.0,
+      "h2o_vmr": 0.004,
+      "samples": 5392,
+      "reference_optical_depth_range": [
+        0.002235893624065104,
+        0.0030899707085992123
+      ],
+      "median_relative_error": 0.0007587377994925979,
+      "percentile_99_relative_error": 0.0008300078531167328,
+      "maximum_relative_error": 0.000960112329279135,
+      "maximum_absolute_error": 2.554430930107668e-06
+    },
+    {
+      "name": "warm_high_pressure",
+      "pressure_edges_bar": [
+        0.7,
+        0.9
+      ],
+      "temperature_k": 285.0,
+      "h2o_vmr": 0.01,
+      "samples": 2331,
+      "reference_optical_depth_range": [
+        0.008102420393956918,
+        0.011040987209633202
+      ],
+      "median_relative_error": 0.0002905447517500653,
+      "percentile_99_relative_error": 0.000310440283685445,
+      "maximum_relative_error": 0.0003972766630173514,
+      "maximum_absolute_error": 3.4839208599111993e-06
+    }
+  ]
+}

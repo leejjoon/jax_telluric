@@ -10,6 +10,7 @@ from .aer import AERLineDatabase
 from .exojax_backend import ExoJAXOpacityBackend
 from .io import load_atmosphere_csv, load_mipas_profile
 from .lblrtm import LBLRTMRunConfig, run_lblrtm, write_tape5
+from .mt_ckd import MTCKDWaterContinuum
 from .reference import (
     LBLRTMSpectrum,
     ValidationMetrics,
@@ -34,6 +35,7 @@ __all__ = [
     "LBLRTMSpectrum",
     "LBLRTMOpticalDepthCorrection",
     "LBLRTMRunConfig",
+    "MTCKDWaterContinuum",
     "SpectralOrder",
     "ReferenceWaterContinuum",
     "TelluricModel",

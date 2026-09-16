@@ -88,6 +88,27 @@ The extended checks pass, including paired mixed-precision and float64 fits.
 ## Optional pressure shifts, MT_CKD, and LBLRTM correction
 
 The default `accuracy_mode="fast"` preserves the optimized behavior above.
+For runtime MT_CKD 4.3 physics across pressure-temperature profiles, load the
+official coefficient file distributed with LBLRTM:
+
+```python
+from jax_telluric import MTCKDWaterContinuum, TelluricModel
+
+continuum = MTCKDWaterContinuum.from_netcdf(
+    "data/lblrtm/LBLRTM/data/absco-ref_wv-mt-ckd.nc", nu_grid
+)
+model = TelluricModel(
+    profile, nu_grid, backend,
+    accuracy_mode="mt_ckd", continuum=continuum,
+)
+```
+
+This path evaluates the self and foreign continua from each layer's pressure,
+temperature, H2O VMR, and molecular column in JAX. The prepared continuum can
+therefore be supplied to models with different atmospheric profiles and remains
+differentiable with respect to fitted H2O column scales. The coefficient file
+itself remains an external AER/LBLRTM input with its original license terms.
+
 For a fixed atmospheric profile and order grid, an offline LBLRTM correction
 template can add MT_CKD H2O continuum, remaining continua, and empirical
 per-species differences from LBLRTM while retaining JAX derivatives during

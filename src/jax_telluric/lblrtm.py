@@ -94,11 +94,19 @@ def write_tape5(
     altitude = _hydrostatic_altitude_edges(profile)[::-1]
     pressure_hpa = np.asarray(profile.pressure_edges_bar)[::-1] * 1000.0
     temperature = _layer_values_at_edges(profile.temperature_k)[::-1]
+    # LBLRTM's ``A`` abundance unit is ppmv relative to dry air, whereas the
+    # public profile stores fractions of total moist air.  Convert at each
+    # reconstructed level so H2O and the dry gases retain their stated wet-air
+    # volume fractions inside LBLRTM.
+    edge_vmr = {
+        name: _layer_values_at_edges(profile.vmr.get(name, np.zeros(nlayers)))[::-1]
+        for name in _LBLRTM_SPECIES
+    }
+    dry_air_fraction = 1.0 - edge_vmr["H2O"]
+    if np.any(dry_air_fraction <= 0.0):
+        raise ValueError("LBLRTM profiles require H2O VMR below one")
     abundance_ppmv = np.column_stack(
-        [
-            _layer_values_at_edges(profile.vmr.get(name, np.zeros(nlayers)))[::-1] * 1.0e6
-            for name in _LBLRTM_SPECIES
-        ]
+        [edge_vmr[name] / dry_air_fraction * 1.0e6 for name in _LBLRTM_SPECIES]
     )
     observer_altitude = float(altitude[0])
     space_altitude = float(altitude[-1])

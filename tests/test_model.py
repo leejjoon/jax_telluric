@@ -8,6 +8,7 @@ from jax_telluric import (
     SpectralOrder,
     ReferenceWaterContinuum,
     LBLRTMOpticalDepthCorrection,
+    MTCKDWaterContinuum,
     TelluricModel,
     TelluricParameters,
     fit_order,
@@ -112,6 +113,53 @@ def test_water_continuum_uses_linear_foreign_and_quadratic_self_scaling():
     )
     actual_tau = -np.log(np.asarray(continuum_model.transmission(params(np.log(2.0)))))
     np.testing.assert_allclose(actual_tau, 2 * (0.01 * 4.0 + 0.02 * 2.0))
+
+
+def test_runtime_mt_ckd_matches_reference_formula_and_is_differentiable():
+    model, nu = make_model()
+    coefficient_nu = np.arange(4250.0, 4370.0, 10.0)
+    self_ref = 2.0e-28 * (1.0 + 1.0e-4 * (coefficient_nu - 4300.0))
+    foreign_ref = 3.0e-28 * (1.0 + 2.0e-4 * (coefficient_nu - 4300.0))
+    exponent = np.full_like(coefficient_nu, 4.2)
+    continuum = MTCKDWaterContinuum(
+        nu, coefficient_nu, self_ref, foreign_ref, exponent
+    )
+    continuum_model = TelluricModel(
+        model.profile,
+        nu,
+        ArrayOpacityBackend({"H2O": np.zeros((2, len(nu)))}),
+        continuum=continuum,
+        accuracy_mode="mt_ckd",
+    )
+
+    actual_tau = -np.log(np.asarray(continuum_model.transmission(params())))
+    pressure_hpa = 0.5 * (
+        model.profile.pressure_edges_bar[:-1] + model.profile.pressure_edges_bar[1:]
+    ) * 1000.0
+    temperature = model.profile.temperature_k
+    water = model.profile.vmr["H2O"]
+    radiation = nu[None, :] * np.tanh(
+        0.5 * nu[None, :] * 1.4387752 / temperature[:, None]
+    )
+    density = pressure_hpa / 1013.0 * 296.0 / temperature
+    expected_self_ref = np.interp(nu, coefficient_nu, self_ref)
+    expected_foreign_ref = np.interp(nu, coefficient_nu, foreign_ref)
+    cross_section = (
+        expected_self_ref[None, :]
+        * (296.0 / temperature[:, None]) ** 4.2
+        * water[:, None]
+        + expected_foreign_ref[None, :] * (1.0 - water[:, None])
+    ) * density[:, None] * radiation
+    expected_tau = np.sum(
+        cross_section * (model.profile.air_column_cm2 * water)[:, None], axis=0
+    )
+    np.testing.assert_allclose(actual_tau, expected_tau, rtol=2.0e-12, atol=2.0e-12)
+
+    derivative = jax.grad(
+        lambda scale: jnp.sum(continuum_model.transmission(params(scale)))
+    )(jnp.asarray(0.0))
+    assert jnp.isfinite(derivative)
+    assert derivative < 0.0
 
 
 def test_lblrtm_corrected_mode_scales_continuum_and_line_residuals(tmp_path):

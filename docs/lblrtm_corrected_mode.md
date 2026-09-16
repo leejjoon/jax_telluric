@@ -1,14 +1,51 @@
 # Optional MT_CKD and LBLRTM-corrected modes
 
 The default `fast` mode evaluates ExoJAX/AER Voigt lines and any explicitly
-supplied continuum backend. Two opt-in modes consume a compact, differentiable
-optical-depth template generated offline by LBLRTM 12.17:
+supplied continuum backend. The `mt_ckd` mode accepts either the native
+`MTCKDWaterContinuum` backend or a fixed optical-depth template. The native
+backend evaluates MT_CKD 4.3 from the current pressure-temperature-abundance
+profile and should be preferred for fitting across atmospheric states.
 
-- `mt_ckd` adds only the isolated H2O self and foreign MT_CKD continua;
+The fixed template modes generated offline by LBLRTM 12.17 are:
+
+- `mt_ckd` with a correction adds only its isolated H2O self and foreign
+  MT_CKD continua;
 - `lblrtm_corrected` adds those continua plus empirical per-species line
   residuals and the fixed reference background.
 
 LBLRTM is not executed during prediction or fitting.
+
+## Native runtime MT_CKD
+
+```python
+from jax_telluric import MTCKDWaterContinuum, TelluricModel
+
+continuum = MTCKDWaterContinuum.from_netcdf(
+    "data/lblrtm/LBLRTM/data/absco-ref_wv-mt-ckd.nc", nu_grid
+)
+model = TelluricModel(
+    profile,
+    nu_grid,
+    backend,
+    accuracy_mode="mt_ckd",
+    continuum=continuum,
+)
+```
+
+The implementation follows LBLRTM 12.17's `mt_ckd_h2o_module.f90`: it applies
+the self-continuum temperature exponent, self and foreign collider densities,
+the radiation factor, and the same four-point cubic interpolation. Coefficients
+are loaded once and the fixed pressure-temperature spectral factors are
+calculated when constructing `TelluricModel`; predictions perform no file I/O
+or coefficient interpolation.
+The layer pressure uses the hydrostatic column-weighted mean of its pressure
+edges. Run `scripts/validate_mt_ckd.py` to reproduce direct comparisons with
+LBLRTM over three pressure-temperature-water states.
+
+Against isolated LBLRTM 12.17 continuum calculations at 5000--5020 cm-1, the
+three cases give median relative optical-depth errors of 0.024%, 0.076%, and
+0.029%. The largest 99th-percentile error is 0.107%; see
+`docs/native_mt_ckd_validation.json` for the states and complete metrics.
 
 The builder first uses the same pressure edges as the JAX layers and enables
 the AER/HITRAN air-pressure line shifts that ExoJAX 2.5 Direct omits. LBLRTM

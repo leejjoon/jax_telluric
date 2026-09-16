@@ -35,6 +35,18 @@ def test_tape5_writer_uses_requested_range_profile_and_continuum(tmp_path):
     assert lines[-1] == "%"
 
 
+def test_tape5_converts_wet_air_vmr_to_lblrtm_dry_air_abundance(tmp_path):
+    profile = AtmosphereProfile(
+        [0.8, 1.0], [280.0], [1.0], {"H2O": [0.1], "CO2": [4.0e-4]}
+    )
+    output = tmp_path / "TAPE5"
+    write_tape5(output, profile, LBLRTMRunConfig(5000.0, 5001.0))
+    lines = output.read_text().splitlines()
+    abundances = np.asarray([float(value) for value in lines[9].split()])
+    np.testing.assert_allclose(abundances[0], 0.1 / 0.9 * 1.0e6)
+    np.testing.assert_allclose(abundances[1], 4.0e-4 / 0.9 * 1.0e6)
+
+
 def test_degrade_and_compare_reference_spectrum():
     nu = np.linspace(5000.0, 5002.0, 4001)
     flux = 1.0 - 0.5 * np.exp(-0.5 * ((nu - 5001.0) / 0.01) ** 2)
@@ -90,6 +102,16 @@ def test_recorded_aer_co_validation_meets_mvp_thresholds():
     assert abs(metrics["line_shift_resolution_elements"]) < thresholds[
         "absolute_line_shift_resolution_elements"
     ]
+
+
+def test_recorded_native_mt_ckd_validation_matches_lblrtm():
+    result = json.loads(Path("docs/native_mt_ckd_validation.json").read_text())
+    assert result["lblrtm"] == "12.17"
+    assert result["mt_ckd"] == "4.3"
+    for case in result["cases"]:
+        assert case["samples"] > 1000
+        assert case["percentile_99_relative_error"] < 2.0e-3
+        assert case["maximum_absolute_error"] < 5.0e-6
 
 
 def test_build_lblrtm_correction_isolates_continuum_and_line_residual(tmp_path, monkeypatch):
