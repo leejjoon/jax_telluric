@@ -1,0 +1,108 @@
+{
+  "platform": "gpu",
+  "device": "cuda:0",
+  "jax": "0.6.2",
+  "python": "3.10.12",
+  "case": {
+    "wavenumber_cm1": [
+      5005.0,
+      5025.0
+    ],
+    "species": [
+      "H2O",
+      "CO2"
+    ],
+    "lines": {
+      "H2O": 1978,
+      "CO2": 6496
+    },
+    "atmospheric_layers": 12,
+    "high_resolution_samples": 5585,
+    "detector_pixels": 1001,
+    "accuracy_mode": "mt_ckd",
+    "stages": [
+      "continuum",
+      "velocity",
+      "columns"
+    ]
+  },
+  "evaluation": {
+    "live_opacity": {
+      "compile_and_first_s": 8.923161913640797,
+      "value_and_gradient_median_ms": 38.30654686316848
+    },
+    "precomputed_opacity": {
+      "compile_and_first_s": 2.3565125707536936,
+      "value_and_gradient_median_ms": 2.527272328734398
+    }
+  },
+  "precompute_build_s": 4.236474308185279,
+  "staged_fit": {
+    "compile_per_stage": {
+      "seconds": 61.22849522251636,
+      "iterations": 207,
+      "residual_rms": 0.00514888626786821,
+      "parameters": {
+        "H2O": 0.3518014553864019,
+        "CO2": -0.12155561772223736,
+        "velocity_kms": 0.2976598820743233,
+        "lsf_sigma_kms": 1.2198521959463566,
+        "log_jitter": -12.0
+      },
+      "speedup_over_reference": 1.0
+    },
+    "shared_compilation": {
+      "seconds": 35.35216194484383,
+      "iterations": 161,
+      "residual_rms": 0.005148886260640057,
+      "parameters": {
+        "H2O": 0.35179908324503656,
+        "CO2": -0.12155939404359936,
+        "velocity_kms": 0.2976604005214102,
+        "lsf_sigma_kms": 1.2198274744722515,
+        "log_jitter": -12.0
+      },
+      "flux_vs_reference": {
+        "max": 2.4925870160674712e-06,
+        "rms": 5.25399834218302e-07
+      },
+      "parameter_relative_difference": {
+        "H2O": 6.742841250418199e-06,
+        "CO2": 3.1066613232410195e-05,
+        "velocity_kms": 1.7417432381531985e-06,
+        "lsf_sigma_kms": 2.0265958603263842e-05,
+        "log_jitter": 0.0
+      },
+      "speedup_over_reference": 1.731959004884753
+    },
+    "precomputed_and_shared": {
+      "seconds": 3.3348421063274145,
+      "iterations": 151,
+      "residual_rms": 0.005148886302972091,
+      "parameters": {
+        "H2O": 0.35179531624361776,
+        "CO2": -0.12155746379074334,
+        "velocity_kms": 0.29766036915422356,
+        "lsf_sigma_kms": 1.2198387171659746,
+        "log_jitter": -12.0
+      },
+      "flux_vs_reference": {
+        "max": 2.345426528160832e-06,
+        "rms": 6.214149831050111e-07
+      },
+      "parameter_relative_difference": {
+        "H2O": 1.7450589501942297e-05,
+        "CO2": 1.5187027474097072e-05,
+        "velocity_kms": 1.636363949525873e-06,
+        "lsf_sigma_kms": 1.1049519299828933e-05,
+        "log_jitter": 0.0
+      },
+      "speedup_over_reference": 18.360238137314962
+    }
+  },
+  "end_to_end_speedup": 8.086902180597502,
+  "truth": {
+    "H2O": 0.35,
+    "CO2": -0.12
+  }
+}
