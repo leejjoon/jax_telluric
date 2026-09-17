@@ -34,6 +34,17 @@ def main() -> None:
     parser.add_argument("--v2", type=float, default=5020.0)
     parser.add_argument("--profile", type=Path, default=Path("data/profiles/example_midlatitude.csv"))
     parser.add_argument("--output", type=Path, default=Path("data/corrections/lblrtm_5000_5020.npz"))
+    # The template is only valid on the grid it was built for, so the grid has
+    # to be selectable: the R=45,000 x 4 default is coarser than an FTS pixel.
+    parser.add_argument("--resolving-power", type=float, default=45_000.0)
+    parser.add_argument("--samples-per-resolution", type=float, default=4.0)
+    parser.add_argument("--margin-cm1", type=float, default=25.0)
+    parser.add_argument("--run-dir", default="run_corrections",
+                        help="working directory under data/lblrtm for this build")
+    # The wing matrix is dense in lines x grid, and vmap over the layer axis
+    # holds every layer at once. On a fine grid that exceeds GPU memory, so
+    # the layer loop has to be available as a slower, smaller alternative.
+    parser.add_argument("--vectorize-layers", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
     if not 0.0 < args.v1 < args.v2:
         parser.error("require 0 < v1 < v2")
@@ -41,7 +52,13 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     reference = root / "data/lblrtm"
     profile = load_atmosphere_csv(root / args.profile)
-    grid = igrins_wavenumber_grid(1.0e7 / args.v2, 1.0e7 / args.v1)
+    grid = igrins_wavenumber_grid(
+        1.0e7 / args.v2,
+        1.0e7 / args.v1,
+        resolving_power=args.resolving_power,
+        samples_per_resolution=args.samples_per_resolution,
+        margin_cm1=args.margin_cm1,
+    )
     line_root = reference / "AER_Line_File/aer_v_3.9/line_files_By_Molecule"
     databases = {}
     for species, molecule_id in MOLECULE_IDS.items():
@@ -59,12 +76,12 @@ def main() -> None:
         methods="direct_sparse",
         temperature_range_k=(float(np.min(profile.temperature_k)), float(np.max(profile.temperature_k))),
         maximum_pressure_bar=float(np.max(profile.pressure_layer_bar)),
-        vectorize_layers=True,
+        vectorize_layers=args.vectorize_layers,
         mixed_precision=False,
         pressure_shift=True,
     )
     correction = build_lblrtm_correction(
-        reference / "run_corrections",
+        reference / args.run_dir,
         profile,
         grid,
         opacity,
@@ -97,7 +114,7 @@ def main() -> None:
         raise RuntimeError("generated correction failed the differentiability smoke test")
 
     reference_spectrum = read_tape12_single_precision(
-        reference / "run_corrections/continuum_all/TAPE12"
+        reference / args.run_dir / "continuum_all/TAPE12"
     )
     reference_transmission = np.interp(
         grid, reference_spectrum.wavenumber_cm1, reference_spectrum.transmission
@@ -136,7 +153,7 @@ def main() -> None:
         from jax_telluric import LBLRTMRunConfig, run_lblrtm
 
         spectrum = run_lblrtm(
-            reference / f"run_corrections/validation_{name}",
+            reference / args.run_dir / f"validation_{name}",
             run_profile,
             LBLRTMRunConfig(float(grid[0]), float(grid[-1]), zenith_angle_deg, 1),
             executable,
@@ -189,6 +206,12 @@ def main() -> None:
         "profile": str(args.profile),
         "requested_wavenumber_cm1": [args.v1, args.v2],
         "correction_grid_cm1": [float(grid[0]), float(grid[-1]), len(grid)],
+        "vectorize_layers": args.vectorize_layers,
+        "resolving_power": args.resolving_power,
+        "samples_per_resolution": args.samples_per_resolution,
+        "grid_velocity_step_kms": float(
+            np.log(grid[1] / grid[0]) * 299792.458
+        ),
         "species": list(species),
         "reference_error_fast": fast_error,
         "reference_error_mt_ckd": mt_ckd_error,

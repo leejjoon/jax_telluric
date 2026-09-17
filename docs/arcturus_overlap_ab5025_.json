@@ -1,0 +1,30 @@
+{
+  "page": "ab5025_",
+  "epoch": "summer",
+  "window_cm1": [
+    5022.2,
+    5027.0
+  ],
+  "sub_width_cm1": 4.8,
+  "full_window_h2o_scale": 1.0874899939997453,
+  "subwindow_mean": 1.0777540127499021,
+  "subwindow_std": 0.0,
+  "subwindow_peak_to_peak": 0.0,
+  "subwindow_fractional_spread": 0.0,
+  "subwindows": [
+    {
+      "wavenumber_cm1": [
+        5022.2,
+        5027.0
+      ],
+      "center_cm1": 5024.6,
+      "pixels": 235,
+      "h2o_scale": 1.0777540127499021,
+      "success": true,
+      "residual_rms": 0.021009834879528094,
+      "mean_telluric_depth": 0.22828878543863507,
+      "max_telluric_depth": 0.9999062437541045,
+      "saturated_fraction": 0.034031413612565446
+    }
+  ]
+}

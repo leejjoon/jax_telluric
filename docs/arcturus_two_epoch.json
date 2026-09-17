@@ -1,0 +1,48 @@
+{
+  "mean_pixel_sigma": 0.005535184231714535,
+  "pixel_kms": 1.1955830827778418,
+  "expected_difference_rms_if_noise": 0.007827932610724396,
+  "unaligned_observer_frame": {
+    "pixels": 988,
+    "correlation": 0.15254298958614368,
+    "difference_rms": 0.029019951806736385
+  },
+  "frames": {
+    "telluric": {
+      "pixels": 991,
+      "correlation": 0.1514792239569177,
+      "difference_rms": 0.02884968696042632,
+      "velocities_kms": [
+        0.2769605592715245,
+        0.15366601314338352
+      ],
+      "reversed_sign": {
+        "pixels": 992,
+        "correlation": 0.15399275255468287,
+        "difference_rms": 0.028792509340738487
+      }
+    },
+    "stellar": {
+      "pixels": 994,
+      "correlation": 0.823699447566723,
+      "difference_rms": 0.012968668914485858,
+      "velocities_kms": [
+        13.669661518255788,
+        -26.757798294218023
+      ],
+      "reversed_sign": {
+        "pixels": 993,
+        "correlation": 0.05357502982872515,
+        "difference_rms": 0.029445856389129308
+      }
+    }
+  },
+  "telluric_velocity_difference_kms": 0.123294546128141,
+  "telluric_velocity_difference_pixels": 0.1031250340559152,
+  "stellar_velocity_separation_kms": 40.42745981247381,
+  "summer_residual_rms": 0.022117121583966903,
+  "winter_residual_rms": 0.02247369871060629,
+  "note": "A systematic shared at the same telluric rest wavenumber is atmospheric; one shared at the same stellar rest wavenumber is the stellar model. 'reversed_sign' is a null control: resampling alone would raise both signs equally.",
+  "dominant_frame": "stellar model",
+  "sign_control_passed": true
+}

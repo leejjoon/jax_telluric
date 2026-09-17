@@ -96,19 +96,42 @@ class SparseCoreDirect(OpaDirect):
         self.mixed_precision = bool(mixed_precision)
         self.pressure_shift = bool(pressure_shift)
         self.delta_air = jnp.asarray(mdb.delta_air) if pressure_shift else None
-        offsets = np.asarray(self.opainfo)
+        line_center = np.asarray(mdb.nu_lines, dtype=float)
+        grid = np.asarray(nu_grid, dtype=float)
         sigma = np.asarray(doppler_sigma(mdb.nu_lines, maximum_temperature_k, mdb.molmass))
         shift_margin = (
             np.abs(np.asarray(mdb.delta_air)) * maximum_pressure_bar / 1.01325
             * Tref_original / minimum_temperature_k
-            if pressure_shift else 0.0
+            if pressure_shift else np.zeros_like(line_center)
         )
-        possible_core = np.abs(offsets) <= (
-            np.sqrt(222.0) * sigma[:, None] + np.asarray(shift_margin)[:, None]
-            if pressure_shift else np.sqrt(222.0) * sigma[:, None]
-        )
-        self.core_line, self.core_grid = np.nonzero(possible_core)
-        self.wing_mask = jnp.asarray(~possible_core)
+        # Per-line half width of the region that can reach Algorithm 916's
+        # branch. Keeping it one-dimensional is what lets the core test be
+        # recomputed inside the kernel instead of read back from a matrix.
+        core_half_width = np.sqrt(222.0) * sigma + shift_margin
+        # Both arrays are sorted, so each line's core region is one contiguous
+        # run of grid samples. Binary search finds it in O(log N) instead of
+        # scanning a dense (line, grid) boolean, which was the last place a
+        # matrix of that size was built -- 2.1 s and a gigabyte on a wide page.
+        # A pair right at the boundary has x*x >= 111, where ExoJAX's hjert
+        # already takes its asymptotic branch, so which side it falls on cannot
+        # change a value.
+        lower = np.searchsorted(grid, line_center - core_half_width, side="left")
+        upper = np.searchsorted(grid, line_center + core_half_width, side="right")
+        counts = np.maximum(upper - lower, 0)
+        total = int(counts.sum())
+        starts = np.repeat(np.cumsum(counts) - counts, counts)
+        self.core_line = np.repeat(np.arange(line_center.size), counts)
+        self.core_grid = np.arange(total) - starts + np.repeat(lower, counts)
+        self._nu_grid = jnp.asarray(grid)
+        self._nu_lines = jnp.asarray(line_center)
+        self._core_half_width = jnp.asarray(core_half_width)
+        self._core_grid = jnp.asarray(self.core_grid)
+        self._core_line = jnp.asarray(self.core_line)
+        # ExoJAX stores nu_grid[None, :] - nu_lines[:, None] as a dense
+        # (line, grid) float64 matrix. At terrestrial line densities that is
+        # hundreds of megabytes re-read once per layer, which dominates the
+        # kernel; every use below rebuilds it from the two 1-D vectors instead.
+        self.opainfo = None
 
     def xsvector(self, T, P, Pself=0.0):
         within_pressure_range = (
@@ -122,13 +145,19 @@ class SparseCoreDirect(OpaDirect):
             lambda: self._full_xsvector(T, P, Pself),
         )
 
-    def _offsets(self, T, P):
+    def _line_shift(self, T, P):
+        """Per-line pressure shift, or zero when shifts are disabled."""
         if not self.pressure_shift:
-            return self.opainfo
+            return None
         # Match LBLRTM's RHORAT scaling: AER/HITRAN shifts are referenced to
         # one atmosphere at Tref, so their magnitude follows number density.
-        density_ratio = (P / 1.01325) * (Tref_original / T)
-        return self.opainfo - self.delta_air[:, None] * density_ratio
+        return self.delta_air * ((P / 1.01325) * (Tref_original / T))
+
+    def _dense_offsets(self, T, P):
+        """Rebuild ExoJAX's (line, grid) offset matrix for the fallback path."""
+        offsets = self._nu_grid[None, :] - self._nu_lines[:, None]
+        shift = self._line_shift(T, P)
+        return offsets if shift is None else offsets - shift[:, None]
 
     def _line_parameters(self, T, P, Pself):
         mdb = self.mdb
@@ -139,23 +168,37 @@ class SparseCoreDirect(OpaDirect):
         return sigma, gamma, strength
 
     def _full_xsvector(self, T, P, Pself):
-        if not self.pressure_shift:
-            return super(SparseCoreDirect, self).xsvector(T, P, Pself)
+        # Identical to OpaDirect.xsvector, which builds the same line
+        # parameters, except that the offset matrix is rebuilt here rather
+        # than held on the device for a branch that is almost never taken.
         sigma, gamma, strength = self._line_parameters(T, P, Pself)
-        return lpf_xsvector(self._offsets(T, P), sigma, gamma, strength)
+        return lpf_xsvector(self._dense_offsets(T, P), sigma, gamma, strength)
 
     def _sparse_xsvector(self, T, P, Pself):
         sigma, gamma, strength = self._line_parameters(T, P, Pself)
         scale = 1 / (jnp.sqrt(2.0) * sigma)
         a = scale * gamma
         weights = strength * scale / jnp.sqrt(jnp.pi)
-        offsets = self._offsets(T, P)
+        shift = self._line_shift(T, P)
+        grid, centers = self._nu_grid, self._nu_lines
+
+        # Both the offsets and the core/wing split are exact functions of two
+        # 1-D vectors, so they are recomputed inside the kernel. XLA then fuses
+        # the whole wing sum into one reduction that reads only those vectors,
+        # instead of streaming a (line, grid) matrix per layer.
+        unshifted = grid[None, :] - centers[:, None]
+        wing_mask = jnp.abs(unshifted) > self._core_half_width[:, None]
+        offsets = unshifted if shift is None else unshifted - shift[:, None]
         # Safe dummy coordinates prevent singular asymptotic evaluations in
         # excluded pairs and keep their reverse-mode derivatives finite.
-        x = jnp.where(self.wing_mask, offsets * scale[:, None], 20.0)
+        x = jnp.where(wing_mask, offsets * scale[:, None], 20.0)
         wing_function = _mixed_wing if self.mixed_precision else _wing
-        wings = jnp.where(self.wing_mask, wing_function(x, a[:, None]), 0.0)
+        wings = jnp.where(wing_mask, wing_function(x, a[:, None]), 0.0)
         spectrum = jnp.sum(wings * weights[:, None], axis=0)
-        core_offsets = offsets[self.core_line, self.core_grid]
-        cores = jax.vmap(hjert)(core_offsets * scale[self.core_line], a[self.core_line])
-        return spectrum.at[self.core_grid].add(cores * weights[self.core_line])
+
+        core_line, core_grid = self._core_line, self._core_grid
+        core_offsets = grid[core_grid] - centers[core_line]
+        if shift is not None:
+            core_offsets = core_offsets - shift[core_line]
+        cores = jax.vmap(hjert)(core_offsets * scale[core_line], a[core_line])
+        return spectrum.at[core_grid].add(cores * weights[core_line])

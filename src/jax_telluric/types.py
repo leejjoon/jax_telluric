@@ -16,6 +16,11 @@ class TelluricParameters(NamedTuple):
     ``log_column_scales`` maps molecule names to natural-log abundance scale
     factors. Continuum coefficients describe log throughput in increasing
     Chebyshev order, which guarantees a positive multiplicative continuum.
+
+    ``velocity_kms`` shifts the whole prediction and is the wavelength-solution
+    zero point. ``stellar_velocity_kms`` additionally shifts only the source
+    spectrum, and therefore has an effect only for an order that carries
+    ``source_flux_model_grid``.
     """
 
     log_column_scales: Mapping[str, ArrayLike]
@@ -24,6 +29,7 @@ class TelluricParameters(NamedTuple):
     lsf_sigma_kms: ArrayLike
     continuum_coeffs: ArrayLike
     log_jitter: ArrayLike
+    stellar_velocity_kms: ArrayLike = 0.0
 
 
 @dataclass(frozen=True)
@@ -98,7 +104,17 @@ class AtmosphereProfile:
 
 @dataclass(frozen=True)
 class SpectralOrder:
-    """One extracted order on a strictly increasing vacuum-wavelength grid."""
+    """One extracted order on a strictly increasing vacuum-wavelength grid.
+
+    A source spectrum may be supplied either on the pixel grid, as
+    ``source_flux``, or on the forward model's high-resolution wavenumber grid,
+    as ``source_flux_model_grid``. The pixel-grid form cannot represent
+    structure narrower than a pixel and is convolved again by the fitted line
+    spread function, so a synthetic stellar spectrum belongs on the model grid.
+    The two are mutually exclusive. The model-grid array is checked against the
+    grid itself by :class:`~jax_telluric.model.TelluricModel`, which is the only
+    place both are known.
+    """
 
     wavelength_vacuum_nm: ArrayLike
     flux: ArrayLike
@@ -106,6 +122,7 @@ class SpectralOrder:
     mask: ArrayLike | None = None
     source_flux: ArrayLike | None = None
     zenith_angle_deg: float = 0.0
+    source_flux_model_grid: ArrayLike | None = None
 
     def __post_init__(self) -> None:
         wavelength = np.asarray(self.wavelength_vacuum_nm, dtype=float)
@@ -119,10 +136,19 @@ class SpectralOrder:
             raise ValueError("vacuum wavelength must be finite and strictly increasing")
         if np.any(~np.isfinite(uncertainty)) or np.any(uncertainty <= 0.0):
             raise ValueError("uncertainties must be finite and positive")
+        if self.source_flux is not None and self.source_flux_model_grid is not None:
+            raise ValueError("supply the source on the pixel grid or the model grid, not both")
         mask = np.ones_like(wavelength, dtype=bool) if self.mask is None else np.asarray(self.mask, dtype=bool)
         source = np.ones_like(wavelength) if self.source_flux is None else np.asarray(self.source_flux, dtype=float)
         if mask.shape != wavelength.shape or source.shape != wavelength.shape:
             raise ValueError("mask and source flux shapes must match wavelength")
+        if self.source_flux_model_grid is not None:
+            model_source = np.asarray(self.source_flux_model_grid, dtype=float)
+            if model_source.ndim != 1 or model_source.size < 8:
+                raise ValueError("model-grid source flux must be one-dimensional with at least eight samples")
+            if np.any(~np.isfinite(model_source)) or np.any(model_source <= 0.0):
+                raise ValueError("model-grid source flux must be finite and positive")
+            object.__setattr__(self, "source_flux_model_grid", model_source)
         if not 0.0 <= self.zenith_angle_deg < 90.0:
             raise ValueError("zenith angle must be in [0, 90) degrees")
         object.__setattr__(self, "wavelength_vacuum_nm", wavelength)

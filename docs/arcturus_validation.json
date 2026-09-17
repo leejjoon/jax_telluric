@@ -1,0 +1,140 @@
+{
+  "window_cm1": [
+    5005.0,
+    5025.0
+  ],
+  "pixels": 1001,
+  "noise": 0.005,
+  "truth": {
+    "H2O_scale": 1.2,
+    "CO2_scale": 1.15,
+    "velocity_kms": 0.3,
+    "lsf_sigma_kms": 0.4
+  },
+  "reference": {
+    "resolving_power": 200000.0,
+    "samples_per_resolution": 4.0,
+    "points": 11168,
+    "velocity_step_kms": 0.3747298946918268,
+    "instrument": "boxcar FTS sinc",
+    "mopd_cm": 15.167
+  },
+  "cases": [
+    {
+      "case": "L1_45k_x4",
+      "resolving_power": 45000.0,
+      "samples_per_resolution": 4.0,
+      "points": 2514,
+      "velocity_step_kms": 1.6651845328665356,
+      "instrument": "boxcar FTS sinc",
+      "seconds": 46.3,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "H2O_scale": 1.1972208292482096,
+      "CO2_scale": 1.1672788570804697,
+      "H2O_error": 0.1706689241825063,
+      "CO2_error": 0.42982927884768696,
+      "velocity_kms": 0.2955388987682143,
+      "lsf_sigma_kms": 0.04999999999999999,
+      "rms": 0.0076401627040288125,
+      "rms_over_noise": 1.5280325408057625,
+      "reduced_chi2": 2.334883445761315
+    },
+    {
+      "case": "L1_100k_x4",
+      "resolving_power": 100000.0,
+      "samples_per_resolution": 4.0,
+      "points": 5585,
+      "velocity_step_kms": 0.7493926810267603,
+      "instrument": "boxcar FTS sinc",
+      "seconds": 63.3,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "H2O_scale": 1.1966828415349238,
+      "CO2_scale": 1.143127013193436,
+      "H2O_error": 0.7955919236377451,
+      "CO2_error": 0.4458654716195418,
+      "velocity_kms": 0.2994397966404367,
+      "lsf_sigma_kms": 0.3431256586840412,
+      "rms": 0.005150240540517194,
+      "rms_over_noise": 1.0300481081034387,
+      "reduced_chi2": 1.0609991050074734
+    },
+    {
+      "case": "L1_200k_x4",
+      "resolving_power": 200000.0,
+      "samples_per_resolution": 4.0,
+      "points": 11168,
+      "velocity_step_kms": 0.3747298946918268,
+      "instrument": "boxcar FTS sinc",
+      "seconds": 75.3,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "H2O_scale": 1.1964567088758713,
+      "CO2_scale": 1.1440029540112866,
+      "H2O_error": 0.11918314421795102,
+      "CO2_error": 0.44697103498749996,
+      "velocity_kms": 0.2976376436004218,
+      "lsf_sigma_kms": 0.3799665480146452,
+      "rms": 0.005121660207224114,
+      "rms_over_noise": 1.0243320414448227,
+      "reduced_chi2": 1.0492561311305182
+    },
+    {
+      "case": "L2_100k_x4_gaussian",
+      "resolving_power": 100000.0,
+      "samples_per_resolution": 4.0,
+      "points": 5585,
+      "velocity_step_kms": 0.7493926810267603,
+      "instrument": "gaussian",
+      "seconds": 47.5,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "H2O_scale": 1.1980278784148202,
+      "CO2_scale": 1.150088180192601,
+      "H2O_error": 0.4672454819152839,
+      "CO2_error": 0.5443712029913903,
+      "velocity_kms": 0.3003297147367279,
+      "lsf_sigma_kms": 0.5238034714062972,
+      "rms": 0.006381552214979274,
+      "rms_over_noise": 1.276310442995855,
+      "reduced_chi2": 1.6289683469002754
+    }
+  ],
+  "L0_injection_recovery": {
+    "note": "formal errors from L-BFGS-B hess_inv are unreliable; see the module docstring",
+    "H2O_fractional_error": -0.0029527426034405466,
+    "H2O_formal_error": 0.11918314421795102,
+    "CO2_fractional_error": -0.005214822598881142,
+    "CO2_formal_error": 0.44697103498749996,
+    "velocity_error_kms": -0.0023623563995782138,
+    "reduced_chi2": 1.0492561311305182,
+    "threshold_fractional_error": 0.01,
+    "passed": true
+  },
+  "L1_grid_convergence": {
+    "threshold_fractional_shift": 0.005,
+    "H2O": {
+      "fractional_shift_100k_vs_200k": 0.00018900195667332736,
+      "converged": true,
+      "fractional_shift_45k_vs_200k": 0.0006386527541445557
+    },
+    "CO2": {
+      "fractional_shift_100k_vs_200k": 0.0007656805559630169,
+      "converged": true,
+      "fractional_shift_45k_vs_200k": 0.020346016579388577
+    },
+    "coarse_45k_rms_over_noise": 1.5280325408057625,
+    "passed": true
+  },
+  "L2_instrument_profile": {
+    "gaussian_rms_over_noise": 1.276310442995855,
+    "sinc_rms_over_noise": 1.0300481081034387,
+    "gaussian_penalty": 1.2390784789128375,
+    "H2O_bias_vs_sinc": 0.0011239710583392252,
+    "CO2_bias_vs_sinc": 0.006089583151148239,
+    "threshold_rms_over_noise": 1.2,
+    "passed": false
+  },
+  "runtime_seconds": 280.3
+}

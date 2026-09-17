@@ -1,0 +1,27 @@
+{
+  "star": "Arcturus",
+  "labels": {
+    "effective_temperature": 4286.0,
+    "log_surface_gravity": 1.66,
+    "metallicity": -0.52,
+    "alpha_enhancement": 0.3,
+    "microturbulence_km_s": 1.7
+  },
+  "label_source": "adopted in differentiable_stellar_spectroscopy dss/calib/star.py, following the Payne Zero paper's anchor values",
+  "wavelength_nm": [
+    1960.0,
+    2130.0
+  ],
+  "r_grid": 600000,
+  "points": 49907,
+  "velocity_step_kms": 0.4996536805577608,
+  "normalized_flux_range": [
+    0.19530505112781885,
+    1.000000011908061
+  ],
+  "initializer_family": "five_label",
+  "atmosphere_converged": false,
+  "atmosphere_closure_required": true,
+  "seconds": 31.741214357316494,
+  "sha256": "2d3592d93762e0dd630faff38bb9e45e2d7ef6425e1a6f40526c864b1fb7989d"
+}

@@ -1,0 +1,72 @@
+{
+  "page": "ab5000_",
+  "epoch": "summer",
+  "window_cm1": [
+    5005.0,
+    5025.0
+  ],
+  "sub_width_cm1": 5.0,
+  "full_window_h2o_scale": 1.0874899939997453,
+  "subwindow_mean": 1.0773126034162634,
+  "subwindow_std": 0.0411408071494765,
+  "subwindow_peak_to_peak": 0.09645976425914893,
+  "subwindow_fractional_spread": 0.08953739513792523,
+  "subwindows": [
+    {
+      "wavenumber_cm1": [
+        5005.0,
+        5010.0
+      ],
+      "center_cm1": 5007.5,
+      "pixels": 246,
+      "h2o_scale": 1.1172807246970071,
+      "success": true,
+      "residual_rms": 0.02118243306243427,
+      "mean_telluric_depth": 0.2813194402697066,
+      "max_telluric_depth": 0.9998102868776515,
+      "saturated_fraction": 0.02506265664160401
+    },
+    {
+      "wavenumber_cm1": [
+        5010.0,
+        5015.0
+      ],
+      "center_cm1": 5012.5,
+      "pixels": 247,
+      "h2o_scale": 1.094304433250299,
+      "success": true,
+      "residual_rms": 0.019192745100954745,
+      "mean_telluric_depth": 0.18741345279129815,
+      "max_telluric_depth": 0.9996748891718058,
+      "saturated_fraction": 0.020050125313283207
+    },
+    {
+      "wavenumber_cm1": [
+        5015.0,
+        5020.0
+      ],
+      "center_cm1": 5017.5,
+      "pixels": 250,
+      "h2o_scale": 1.0208209604378582,
+      "success": true,
+      "residual_rms": 0.026531005138996366,
+      "mean_telluric_depth": 0.03639240788264064,
+      "max_telluric_depth": 0.19979531937321315,
+      "saturated_fraction": 0.0
+    },
+    {
+      "wavenumber_cm1": [
+        5020.0,
+        5025.0
+      ],
+      "center_cm1": 5022.5,
+      "pixels": 244,
+      "h2o_scale": 1.0768442952798896,
+      "success": true,
+      "residual_rms": 0.020665257542026416,
+      "mean_telluric_depth": 0.18407939114824878,
+      "max_telluric_depth": 0.9998963423525885,
+      "saturated_fraction": 0.032663316582914576
+    }
+  ]
+}

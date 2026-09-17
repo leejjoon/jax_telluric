@@ -1,0 +1,1909 @@
+{
+  "generated": "2026-09-17T06:53:52",
+  "atlas_root": "/home/jjlee/work/differentiable_stellar_spectroscopy/data/atlases/arcturus/ir",
+  "stellar": "/home/jjlee/work/lblrtm/data/stellar/arcturus_payne_zero_full.npz",
+  "profile": "data/profiles/kitt_peak_1994.csv",
+  "settings": {
+    "resolving_power": 100000.0,
+    "samples_per_resolution": 4.0,
+    "margin_cm1": 25.0,
+    "min_optical_depth": 0.02,
+    "min_transmission": 0.15
+  },
+  "results": [
+    {
+      "page": "ab2021_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        2022.5,
+        2026.5
+      ],
+      "pixels": 401,
+      "reliable": 359,
+      "grid_points": 10671,
+      "layer_chunk": 5,
+      "mopd_cm": 30.41065482799658,
+      "lines": {
+        "CH4": 288,
+        "CO": 209,
+        "CO2": 6065,
+        "H2O": 749,
+        "N2O": 35
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO": 0.2607,
+        "CO2": 10.7299,
+        "H2O": 534.4748,
+        "N2O": 0.0
+      },
+      "free_species": [
+        "CO",
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.8479194851804526,
+      "parameters": {
+        "CH4": 0.0,
+        "CO": 2.0,
+        "CO2": 0.48167811892234497,
+        "H2O": -0.06355713951592411,
+        "N2O": 0.0,
+        "velocity_kms": -0.31743191646305485,
+        "stellar_velocity_kms": 14.490703548774917,
+        "lsf_sigma_kms": 1.1032234878027494,
+        "log_jitter": -2.8489564323375305
+      },
+      "pixel_sigma": 0.008976138016000695,
+      "residual_rms": 0.05859284066207653,
+      "residual_rms_over_noise": 6.527622520690973,
+      "reduced_chi2": 42.60985577263198,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -877.2130141446999,
+          "iterations": 44,
+          "seconds": 91.1
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -882.2742296689537,
+          "iterations": 49,
+          "seconds": 84.1
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -890.347456966535,
+          "iterations": 74,
+          "seconds": 81.9
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -890.4513913176382,
+          "iterations": 46,
+          "seconds": 82.9
+        }
+      ]
+    },
+    {
+      "page": "ab2021_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        2022.5,
+        2026.5
+      ],
+      "pixels": 401,
+      "reliable": 385,
+      "grid_points": 10671,
+      "layer_chunk": 5,
+      "mopd_cm": 30.41065482799658,
+      "lines": {
+        "CH4": 288,
+        "CO": 209,
+        "CO2": 6065,
+        "H2O": 749,
+        "N2O": 35
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO": 0.2607,
+        "CO2": 10.7299,
+        "H2O": 534.4748,
+        "N2O": 0.0
+      },
+      "free_species": [
+        "CO",
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.949139173766333,
+      "parameters": {
+        "CH4": 0.0,
+        "CO": -1.9999999999999998,
+        "CO2": 0.027952921224278726,
+        "H2O": -1.3677526907699182,
+        "N2O": 0.0,
+        "velocity_kms": 1.0069192207986637,
+        "stellar_velocity_kms": -30.675796444746886,
+        "lsf_sigma_kms": 0.050000000000000044,
+        "log_jitter": -2.7264773157327977
+      },
+      "pixel_sigma": 0.00857666053180916,
+      "residual_rms": 0.0660050452341191,
+      "residual_rms_over_noise": 7.695891074307915,
+      "reduced_chi2": 59.22673942761225,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -404.02233572764703,
+          "iterations": 24,
+          "seconds": 79.8
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -615.9742259559398,
+          "iterations": 16,
+          "seconds": 71.6
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -849.7907131347831,
+          "iterations": 78,
+          "seconds": 79.5
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -882.773589149443,
+          "iterations": 99,
+          "seconds": 83.1
+        }
+      ]
+    },
+    {
+      "page": "ab2475_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        2476.0,
+        2489.0
+      ],
+      "pixels": 1301,
+      "reliable": 1301,
+      "grid_points": 10153,
+      "layer_chunk": 3,
+      "mopd_cm": 25.263742364801125,
+      "lines": {
+        "CH4": 3588,
+        "CO2": 2714,
+        "H2O": 705,
+        "N2O": 3512
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.3775,
+        "CO2": 0.0326,
+        "H2O": 0.0158,
+        "N2O": 0.6194
+      },
+      "free_species": [
+        "CH4",
+        "CO2",
+        "N2O"
+      ],
+      "median_transmission": 0.9853388348692562,
+      "parameters": {
+        "CH4": 0.09484380010327845,
+        "CO2": 0.46159490684965115,
+        "H2O": 0.0,
+        "N2O": 0.06046005832432528,
+        "velocity_kms": 0.21066594972480923,
+        "stellar_velocity_kms": 14.342681285508764,
+        "lsf_sigma_kms": 0.8060803394662635,
+        "log_jitter": -4.328711918189835
+      },
+      "pixel_sigma": 0.005247681496879782,
+      "residual_rms": 0.014190482627247123,
+      "residual_rms_over_noise": 2.7041432746413134,
+      "reduced_chi2": 7.312390849787846,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -4838.4826557193755,
+          "iterations": 18,
+          "seconds": 108.5
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4861.227838399012,
+          "iterations": 14,
+          "seconds": 95.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4885.480394716142,
+          "iterations": 30,
+          "seconds": 91.2
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4885.494093359539,
+          "iterations": 14,
+          "seconds": 96.2
+        }
+      ]
+    },
+    {
+      "page": "ab2475_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        2476.0,
+        2489.0
+      ],
+      "pixels": 1301,
+      "reliable": 1301,
+      "grid_points": 10153,
+      "layer_chunk": 3,
+      "mopd_cm": 25.54136590727147,
+      "lines": {
+        "CH4": 3588,
+        "CO2": 2714,
+        "H2O": 705,
+        "N2O": 3512
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.3775,
+        "CO2": 0.0326,
+        "H2O": 0.0158,
+        "N2O": 0.6194
+      },
+      "free_species": [
+        "CH4",
+        "CO2",
+        "N2O"
+      ],
+      "median_transmission": 0.9863072480123101,
+      "parameters": {
+        "CH4": -0.019543169629843326,
+        "CO2": 0.2268972639887647,
+        "H2O": 0.0,
+        "N2O": 0.03389531001565499,
+        "velocity_kms": 0.37809800896066004,
+        "stellar_velocity_kms": -26.101156163048252,
+        "lsf_sigma_kms": 0.8598476701387081,
+        "log_jitter": -4.576026170000364
+      },
+      "pixel_sigma": 0.0030626607121352263,
+      "residual_rms": 0.010741597054232482,
+      "residual_rms_over_noise": 3.5072762097580354,
+      "reduced_chi2": 12.300986411534689,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -5093.723809034498,
+          "iterations": 18,
+          "seconds": 89.6
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -5236.485324339459,
+          "iterations": 15,
+          "seconds": 93.3
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -5247.735664327762,
+          "iterations": 23,
+          "seconds": 96.5
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -5247.754580777924,
+          "iterations": 15,
+          "seconds": 95.7
+        }
+      ]
+    },
+    {
+      "page": "ab2865_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        2866.0,
+        2879.0
+      ],
+      "pixels": 1301,
+      "reliable": 1300,
+      "grid_points": 8775,
+      "layer_chunk": 3,
+      "mopd_cm": 25.263742364801125,
+      "lines": {
+        "CH4": 8762,
+        "CO2": 853,
+        "H2O": 1684,
+        "N2O": 1225
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 5.6544,
+        "CO2": 0.0,
+        "H2O": 2.2677,
+        "N2O": 0.0002
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.9393559214475806,
+      "parameters": {
+        "CH4": 0.16394681577115833,
+        "CO2": 0.0,
+        "H2O": 0.2568506834131309,
+        "N2O": 0.0,
+        "velocity_kms": 0.33822734731988663,
+        "stellar_velocity_kms": 14.796724241220456,
+        "lsf_sigma_kms": 0.4272262093897802,
+        "log_jitter": -4.231415500366738
+      },
+      "pixel_sigma": 0.004206618962319917,
+      "residual_rms": 0.01512837153459483,
+      "residual_rms_over_noise": 3.5963256168682447,
+      "reduced_chi2": 12.933557942542762,
+      "all_stages_converged": false,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -4217.277492815855,
+          "iterations": 28,
+          "seconds": 92.1
+        },
+        {
+          "stage": "velocity",
+          "success": false,
+          "objective": -4391.079776371562,
+          "iterations": 20,
+          "seconds": 92.7
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4787.9141346540455,
+          "iterations": 38,
+          "seconds": 90.5
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4802.229588462737,
+          "iterations": 63,
+          "seconds": 95.5
+        }
+      ]
+    },
+    {
+      "page": "ab2865_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        2866.0,
+        2879.0
+      ],
+      "pixels": 1301,
+      "reliable": 1300,
+      "grid_points": 8775,
+      "layer_chunk": 3,
+      "mopd_cm": 25.43031649028333,
+      "lines": {
+        "CH4": 8762,
+        "CO2": 853,
+        "H2O": 1684,
+        "N2O": 1225
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 5.6544,
+        "CO2": 0.0,
+        "H2O": 2.2677,
+        "N2O": 0.0002
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.947685434108097,
+      "parameters": {
+        "CH4": 0.06333488470751197,
+        "CO2": 0.0,
+        "H2O": 0.017534954102285845,
+        "N2O": 0.0,
+        "velocity_kms": 0.419652357340612,
+        "stellar_velocity_kms": -26.456964848713984,
+        "lsf_sigma_kms": 0.4638143285823381,
+        "log_jitter": -4.293268980437348
+      },
+      "pixel_sigma": 0.0037102984516576777,
+      "residual_rms": 0.014155132622470501,
+      "residual_rms_over_noise": 3.8150927228364355,
+      "reduced_chi2": 14.554932483839528,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -4452.607708230669,
+          "iterations": 20,
+          "seconds": 82.2
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4813.985202824806,
+          "iterations": 22,
+          "seconds": 89.2
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4887.19442871649,
+          "iterations": 50,
+          "seconds": 87.9
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4888.73906649749,
+          "iterations": 27,
+          "seconds": 88.6
+        }
+      ]
+    },
+    {
+      "page": "ab3255_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        3256.0,
+        3271.0
+      ],
+      "pixels": 1201,
+      "reliable": 842,
+      "grid_points": 7969,
+      "layer_chunk": 5,
+      "mopd_cm": 24.20877290429454,
+      "lines": {
+        "CH4": 1785,
+        "CO2": 3521,
+        "H2O": 1536,
+        "N2O": 2297
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0036,
+        "CO2": 0.0069,
+        "H2O": 181.7782,
+        "N2O": 0.0003
+      },
+      "free_species": [
+        "H2O"
+      ],
+      "median_transmission": 0.441746966843598,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": 0.5987634088315035,
+        "N2O": 0.0,
+        "velocity_kms": 0.45465048992655327,
+        "stellar_velocity_kms": 14.109275019424242,
+        "lsf_sigma_kms": 0.050000000000000044,
+        "log_jitter": -4.205168714981855
+      },
+      "pixel_sigma": 0.0020760723799650707,
+      "residual_rms": 0.01506191120157425,
+      "residual_rms_over_noise": 7.2550029309805,
+      "reduced_chi2": 52.635067528535636,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -1942.3336373536376,
+          "iterations": 28,
+          "seconds": 74.9
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -1944.664236442436,
+          "iterations": 33,
+          "seconds": 67.6
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -3837.5755814848403,
+          "iterations": 56,
+          "seconds": 70.4
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -3839.714018974844,
+          "iterations": 41,
+          "seconds": 71.9
+        }
+      ]
+    },
+    {
+      "page": "ab3255_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        3256.0,
+        3271.0
+      ],
+      "pixels": 1201,
+      "reliable": 1060,
+      "grid_points": 7969,
+      "layer_chunk": 5,
+      "mopd_cm": 18.967240422263796,
+      "lines": {
+        "CH4": 1785,
+        "CO2": 3521,
+        "H2O": 1536,
+        "N2O": 2297
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0036,
+        "CO2": 0.0069,
+        "H2O": 181.7782,
+        "N2O": 0.0003
+      },
+      "free_species": [
+        "H2O"
+      ],
+      "median_transmission": 0.8248875538298541,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": -0.8531051264555958,
+        "N2O": 0.0,
+        "velocity_kms": -0.035084004932538104,
+        "stellar_velocity_kms": -25.566655704745447,
+        "lsf_sigma_kms": 0.37544569794868177,
+        "log_jitter": -4.165338873233213
+      },
+      "pixel_sigma": 0.002076072379965138,
+      "residual_rms": 0.01566266472447627,
+      "residual_rms_over_noise": 7.544373151739191,
+      "reduced_chi2": 56.91756625268313,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -1426.3116393487026,
+          "iterations": 28,
+          "seconds": 66.5
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -1457.1370364200138,
+          "iterations": 19,
+          "seconds": 66.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -3889.888638038926,
+          "iterations": 71,
+          "seconds": 72.2
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -3901.4592962825736,
+          "iterations": 28,
+          "seconds": 68.3
+        }
+      ]
+    },
+    {
+      "page": "ab4300_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        4299.6,
+        4324.58
+      ],
+      "pixels": 1250,
+      "reliable": 1247,
+      "grid_points": 6957,
+      "layer_chunk": 5,
+      "mopd_cm": 15.133333333003003,
+      "lines": {
+        "CH4": 6202,
+        "CO": 77,
+        "CO2": 739,
+        "H2O": 1184,
+        "N2O": 1818
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 3.0398,
+        "CO": 0.1178,
+        "CO2": 0.0,
+        "H2O": 1.9491,
+        "N2O": 0.0006
+      },
+      "free_species": [
+        "CH4",
+        "CO",
+        "H2O"
+      ],
+      "median_transmission": 0.9484115952655994,
+      "parameters": {
+        "CH4": 0.15155739681138272,
+        "CO": 0.02844942811453599,
+        "CO2": 0.0,
+        "H2O": 0.1746818873990759,
+        "N2O": 0.0,
+        "velocity_kms": 0.26612838886025747,
+        "stellar_velocity_kms": 14.628626908627421,
+        "lsf_sigma_kms": 0.09666580830846049,
+        "log_jitter": -3.9143922198248666
+      },
+      "pixel_sigma": 0.01085852434302455,
+      "residual_rms": 0.022715848412764677,
+      "residual_rms_over_noise": 2.0919830075582233,
+      "reduced_chi2": 4.3763929039123495,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3857.790483631352,
+          "iterations": 21,
+          "seconds": 83.5
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3897.67557105555,
+          "iterations": 33,
+          "seconds": 75.1
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4051.8552861146577,
+          "iterations": 52,
+          "seconds": 76.1
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4105.865537616039,
+          "iterations": 42,
+          "seconds": 75.8
+        }
+      ]
+    },
+    {
+      "page": "ab4300_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        4299.6,
+        4324.58
+      ],
+      "pixels": 1250,
+      "reliable": 1249,
+      "grid_points": 6957,
+      "layer_chunk": 5,
+      "mopd_cm": 13.59999999970314,
+      "lines": {
+        "CH4": 6202,
+        "CO": 77,
+        "CO2": 739,
+        "H2O": 1184,
+        "N2O": 1818
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 3.0398,
+        "CO": 0.1178,
+        "CO2": 0.0,
+        "H2O": 1.9491,
+        "N2O": 0.0006
+      },
+      "free_species": [
+        "CH4",
+        "CO",
+        "H2O"
+      ],
+      "median_transmission": 0.9632061010175648,
+      "parameters": {
+        "CH4": -0.016574912507500913,
+        "CO": -1.424676497274789,
+        "CO2": 0.0,
+        "H2O": -0.8804101546734161,
+        "N2O": 0.0,
+        "velocity_kms": 0.14048564545382364,
+        "stellar_velocity_kms": -25.929687374334975,
+        "lsf_sigma_kms": 0.5906843174102417,
+        "log_jitter": -3.81247894098255
+      },
+      "pixel_sigma": 0.00934837839899751,
+      "residual_rms": 0.02398972482127127,
+      "residual_rms_over_noise": 2.5661910330719873,
+      "reduced_chi2": 6.5853364182190735,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3637.4199579237256,
+          "iterations": 20,
+          "seconds": 69.3
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3652.3138706370396,
+          "iterations": 24,
+          "seconds": 70.0
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4022.113283963011,
+          "iterations": 70,
+          "seconds": 74.2
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4037.6620909439985,
+          "iterations": 58,
+          "seconds": 72.9
+        }
+      ]
+    },
+    {
+      "page": "ab4950_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        4949.6,
+        4974.58
+      ],
+      "pixels": 1250,
+      "reliable": 945,
+      "grid_points": 6046,
+      "layer_chunk": 5,
+      "mopd_cm": 15.16666666633561,
+      "lines": {
+        "CO2": 7956,
+        "H2O": 1951,
+        "N2O": 1650
+      },
+      "absent": [
+        "CH4",
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CO2": 142.7733,
+        "H2O": 4.108,
+        "N2O": 0.0017
+      },
+      "free_species": [
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.5254228470226475,
+      "parameters": {
+        "CO2": 0.18086522312463485,
+        "H2O": 0.17639074876571628,
+        "N2O": 0.0,
+        "velocity_kms": 0.2717839877109061,
+        "stellar_velocity_kms": 14.622001445142622,
+        "lsf_sigma_kms": 0.12071283480398437,
+        "log_jitter": -5.106418177722166
+      },
+      "pixel_sigma": 0.0063058489309898895,
+      "residual_rms": 0.008744003701183363,
+      "residual_rms_over_noise": 1.3866497274001033,
+      "reduced_chi2": 1.9227974664987815,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3279.970826051339,
+          "iterations": 38,
+          "seconds": 67.6
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3383.8850406457877,
+          "iterations": 36,
+          "seconds": 62.0
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4678.262510695509,
+          "iterations": 68,
+          "seconds": 64.7
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4680.283363462786,
+          "iterations": 44,
+          "seconds": 65.5
+        }
+      ]
+    },
+    {
+      "page": "ab4950_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        4949.6,
+        4974.58
+      ],
+      "pixels": 1250,
+      "reliable": 984,
+      "grid_points": 6046,
+      "layer_chunk": 5,
+      "mopd_cm": 13.633333333035745,
+      "lines": {
+        "CO2": 7956,
+        "H2O": 1951,
+        "N2O": 1650
+      },
+      "absent": [
+        "CH4",
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CO2": 142.7733,
+        "H2O": 4.108,
+        "N2O": 0.0017
+      },
+      "free_species": [
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.5941443929205349,
+      "parameters": {
+        "CO2": 0.0526467253499242,
+        "H2O": -0.9747227643824481,
+        "N2O": 0.0,
+        "velocity_kms": 0.17332854964576,
+        "stellar_velocity_kms": -25.938625330158658,
+        "lsf_sigma_kms": 0.5015801674897892,
+        "log_jitter": -4.352954871117163
+      },
+      "pixel_sigma": 0.006188272417820762,
+      "residual_rms": 0.014279256631969073,
+      "residual_rms_over_noise": 2.307470594030119,
+      "reduced_chi2": 5.324420542313709,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3019.656864175514,
+          "iterations": 27,
+          "seconds": 59.8
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3036.8902054048913,
+          "iterations": 36,
+          "seconds": 58.1
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4134.5955080387985,
+          "iterations": 80,
+          "seconds": 63.2
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4135.08896013054,
+          "iterations": 39,
+          "seconds": 62.2
+        }
+      ]
+    },
+    {
+      "page": "ab5900_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        5899.6,
+        5924.58
+      ],
+      "pixels": 1250,
+      "reliable": 1250,
+      "grid_points": 5075,
+      "layer_chunk": 11,
+      "mopd_cm": 15.16666666633561,
+      "lines": {
+        "CH4": 3140,
+        "CO": 9,
+        "CO2": 2885,
+        "H2O": 618,
+        "N2O": 408
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.3934,
+        "CO": 0.0,
+        "CO2": 0.0009,
+        "H2O": 0.4733,
+        "N2O": 0.0008
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.9966385583950159,
+      "parameters": {
+        "CH4": 0.15103293523998063,
+        "CO": 0.0,
+        "CO2": 0.0,
+        "H2O": 0.09684446602608907,
+        "N2O": 0.0,
+        "velocity_kms": 0.2573466009958196,
+        "stellar_velocity_kms": 14.530818815464041,
+        "lsf_sigma_kms": 1.5525678750660041,
+        "log_jitter": -3.95152871123702
+      },
+      "pixel_sigma": 0.0036527979046908415,
+      "residual_rms": 0.01956921250734441,
+      "residual_rms_over_noise": 5.357321433582204,
+      "reduced_chi2": 28.700892942719285,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -4234.063295883434,
+          "iterations": 21,
+          "seconds": 65.3
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4280.186064315976,
+          "iterations": 19,
+          "seconds": 56.8
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4290.55914973011,
+          "iterations": 20,
+          "seconds": 56.2
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4292.247172714242,
+          "iterations": 22,
+          "seconds": 58.2
+        }
+      ]
+    },
+    {
+      "page": "ab5900_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        5899.6,
+        5924.58
+      ],
+      "pixels": 1250,
+      "reliable": 1250,
+      "grid_points": 5075,
+      "layer_chunk": 11,
+      "mopd_cm": 13.59999999970314,
+      "lines": {
+        "CH4": 3140,
+        "CO": 9,
+        "CO2": 2885,
+        "H2O": 618,
+        "N2O": 408
+      },
+      "absent": [
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.3934,
+        "CO": 0.0,
+        "CO2": 0.0009,
+        "H2O": 0.4733,
+        "N2O": 0.0008
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.9976819447611329,
+      "parameters": {
+        "CH4": 0.07079009871873997,
+        "CO": 0.0,
+        "CO2": 0.0,
+        "H2O": -1.0687612969245892,
+        "N2O": 0.0,
+        "velocity_kms": 0.19668921013277957,
+        "stellar_velocity_kms": -25.99129776880095,
+        "lsf_sigma_kms": 1.7827172855851847,
+        "log_jitter": -4.090414623133225
+      },
+      "pixel_sigma": 0.0030323972663630428,
+      "residual_rms": 0.017004860435140316,
+      "residual_rms_over_noise": 5.607728454238908,
+      "reduced_chi2": 31.446618416480696,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -4130.299924602052,
+          "iterations": 22,
+          "seconds": 56.3
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4263.121159954333,
+          "iterations": 19,
+          "seconds": 56.3
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4467.496974685822,
+          "iterations": 34,
+          "seconds": 58.5
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4467.820084800372,
+          "iterations": 30,
+          "seconds": 57.9
+        }
+      ]
+    },
+    {
+      "page": "ab6550_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        6549.6,
+        6574.58
+      ],
+      "pixels": 1250,
+      "reliable": 1248,
+      "grid_points": 4572,
+      "layer_chunk": 12,
+      "mopd_cm": 15.16666666633561,
+      "lines": {
+        "CH4": 1998,
+        "CO2": 1895,
+        "H2O": 2007,
+        "N2O": 485
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0002,
+        "CO2": 0.0761,
+        "H2O": 0.908,
+        "N2O": 0.0021
+      },
+      "free_species": [
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.9941319444634447,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 1.5092287536464,
+        "H2O": 0.28829354879314245,
+        "N2O": 0.0,
+        "velocity_kms": 0.2230679154294332,
+        "stellar_velocity_kms": 14.28321515168308,
+        "lsf_sigma_kms": 0.8629884638010455,
+        "log_jitter": -3.7449190672551658
+      },
+      "pixel_sigma": 0.006319007477211595,
+      "residual_rms": 0.024467540470821437,
+      "residual_rms_over_noise": 3.8720543628187465,
+      "reduced_chi2": 14.992804988623687,
+      "all_stages_converged": false,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3930.3904707935712,
+          "iterations": 25,
+          "seconds": 33.6
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3941.9607420610955,
+          "iterations": 14,
+          "seconds": 28.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4006.3951967113708,
+          "iterations": 46,
+          "seconds": 26.9
+        },
+        {
+          "stage": "stellar",
+          "success": false,
+          "objective": -4006.5890824079443,
+          "iterations": 33,
+          "seconds": 28.9
+        }
+      ]
+    },
+    {
+      "page": "ab6550_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        6549.6,
+        6574.58
+      ],
+      "pixels": 1250,
+      "reliable": 1250,
+      "grid_points": 4572,
+      "layer_chunk": 12,
+      "mopd_cm": 13.59999999970314,
+      "lines": {
+        "CH4": 1998,
+        "CO2": 1895,
+        "H2O": 2007,
+        "N2O": 485
+      },
+      "absent": [
+        "CO",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0002,
+        "CO2": 0.0761,
+        "H2O": 0.908,
+        "N2O": 0.0021
+      },
+      "free_species": [
+        "CO2",
+        "H2O"
+      ],
+      "median_transmission": 0.9973168959890643,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 1.482063043899884,
+        "H2O": -0.7232689183287121,
+        "N2O": 0.0,
+        "velocity_kms": 0.343816988081284,
+        "stellar_velocity_kms": -26.10247493694486,
+        "lsf_sigma_kms": 1.4440833715142245,
+        "log_jitter": -3.767795681275525
+      },
+      "pixel_sigma": 0.004996494896971501,
+      "residual_rms": 0.02363706025295616,
+      "residual_rms_over_noise": 4.73072838867166,
+      "reduced_chi2": 22.379791087383957,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3802.8121933926527,
+          "iterations": 25,
+          "seconds": 27.5
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -3898.3828945403175,
+          "iterations": 18,
+          "seconds": 28.3
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4056.167859743671,
+          "iterations": 29,
+          "seconds": 29.8
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4056.174311198517,
+          "iterations": 17,
+          "seconds": 28.4
+        }
+      ]
+    },
+    {
+      "page": "ab7925_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        7925.0,
+        7949.967
+      ],
+      "pixels": 750,
+      "reliable": 748,
+      "grid_points": 3779,
+      "layer_chunk": 12,
+      "mopd_cm": 8.855218855123187,
+      "lines": {
+        "CH4": 1703,
+        "CO": 5,
+        "CO2": 1059,
+        "H2O": 1107,
+        "O2": 279
+      },
+      "absent": [
+        "N2O"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO": 0.0,
+        "CO2": 0.0008,
+        "H2O": 0.0326,
+        "O2": 5.9867
+      },
+      "free_species": [
+        "H2O",
+        "O2"
+      ],
+      "median_transmission": 0.9973674866339975,
+      "parameters": {
+        "CH4": 0.0,
+        "CO": 0.0,
+        "CO2": 0.0,
+        "H2O": -0.09094311236122099,
+        "O2": 0.3071118302135783,
+        "velocity_kms": 0.30704214316219075,
+        "stellar_velocity_kms": 14.643028478858165,
+        "lsf_sigma_kms": 0.10963446923665683,
+        "log_jitter": -4.1497488881551465
+      },
+      "pixel_sigma": 0.007411517869583939,
+      "residual_rms": 0.017423363659534803,
+      "residual_rms_over_noise": 2.350849578470071,
+      "reduced_chi2": 5.526493740592913,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -2356.221088441078,
+          "iterations": 26,
+          "seconds": 33.7
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -2458.8381046777167,
+          "iterations": 39,
+          "seconds": 23.1
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -2658.526847296417,
+          "iterations": 48,
+          "seconds": 22.8
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -2662.4574257782724,
+          "iterations": 42,
+          "seconds": 22.9
+        }
+      ]
+    },
+    {
+      "page": "ab7925_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        7925.0,
+        7949.967
+      ],
+      "pixels": 750,
+      "reliable": 748,
+      "grid_points": 3779,
+      "layer_chunk": 12,
+      "mopd_cm": 8.855218855123187,
+      "lines": {
+        "CH4": 1703,
+        "CO": 5,
+        "CO2": 1059,
+        "H2O": 1107,
+        "O2": 279
+      },
+      "absent": [
+        "N2O"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO": 0.0,
+        "CO2": 0.0008,
+        "H2O": 0.0326,
+        "O2": 5.9867
+      },
+      "free_species": [
+        "H2O",
+        "O2"
+      ],
+      "median_transmission": 0.9975545452361896,
+      "parameters": {
+        "CH4": 0.0,
+        "CO": 0.0,
+        "CO2": 0.0,
+        "H2O": -0.6706180400379413,
+        "O2": 0.2896491961841238,
+        "velocity_kms": 0.4174492662211595,
+        "stellar_velocity_kms": -30.070252358519674,
+        "lsf_sigma_kms": 0.11713584537922925,
+        "log_jitter": -4.2277459503424515
+      },
+      "pixel_sigma": 0.007853364177856335,
+      "residual_rms": 0.01656515274776674,
+      "residual_rms_over_noise": 2.1093065815634167,
+      "reduced_chi2": 4.449174255026747,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -2062.968934156536,
+          "iterations": 27,
+          "seconds": 23.4
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -2192.959381920988,
+          "iterations": 36,
+          "seconds": 22.5
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -2271.832069283507,
+          "iterations": 50,
+          "seconds": 22.7
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -2700.3405166184853,
+          "iterations": 53,
+          "seconds": 23.3
+        }
+      ]
+    },
+    {
+      "page": "ab8575_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        8575.0,
+        8599.967
+      ],
+      "pixels": 750,
+      "reliable": 744,
+      "grid_points": 3493,
+      "layer_chunk": 12,
+      "mopd_cm": 8.888888888547873,
+      "lines": {
+        "CH4": 2062,
+        "CO2": 232,
+        "H2O": 2099
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0271,
+        "CO2": 0.0,
+        "H2O": 9.3863
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.9611475276680638,
+      "parameters": {
+        "CH4": 0.7263265358472346,
+        "CO2": 0.0,
+        "H2O": 0.22481818349448535,
+        "velocity_kms": 0.38926410488553886,
+        "stellar_velocity_kms": 14.750842056396555,
+        "lsf_sigma_kms": 0.05,
+        "log_jitter": -3.819475785987006
+      },
+      "pixel_sigma": 0.00816810401388601,
+      "residual_rms": 0.023410136143804543,
+      "residual_rms_over_noise": 2.8660428544992382,
+      "reduced_chi2": 8.21420164382614,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -2128.8459484752043,
+          "iterations": 26,
+          "seconds": 23.2
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -2225.963612885289,
+          "iterations": 31,
+          "seconds": 18.5
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -2414.70984963665,
+          "iterations": 54,
+          "seconds": 19.0
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -2434.430463873935,
+          "iterations": 32,
+          "seconds": 18.4
+        }
+      ]
+    },
+    {
+      "page": "ab8575_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        8575.0,
+        8599.967
+      ],
+      "pixels": 750,
+      "reliable": 750,
+      "grid_points": 3493,
+      "layer_chunk": 12,
+      "mopd_cm": 8.787878787541647,
+      "lines": {
+        "CH4": 2062,
+        "CO2": 232,
+        "H2O": 2099
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0271,
+        "CO2": 0.0,
+        "H2O": 9.3863
+      },
+      "free_species": [
+        "CH4",
+        "H2O"
+      ],
+      "median_transmission": 0.9852612143631188,
+      "parameters": {
+        "CH4": 0.5966231980266405,
+        "CO2": 0.0,
+        "H2O": -1.0035949158018178,
+        "velocity_kms": 0.5468152109225537,
+        "stellar_velocity_kms": -29.958507771241155,
+        "lsf_sigma_kms": 0.4092877236112171,
+        "log_jitter": -3.999095576259615
+      },
+      "pixel_sigma": 0.005172022882449541,
+      "residual_rms": 0.019047866093822922,
+      "residual_rms_over_noise": 3.682865781290123,
+      "reduced_chi2": 13.56350036299771,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -1423.048113783635,
+          "iterations": 33,
+          "seconds": 17.6
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -1632.9807526695072,
+          "iterations": 31,
+          "seconds": 17.6
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -1948.2880328356234,
+          "iterations": 57,
+          "seconds": 18.6
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -2595.600149814179,
+          "iterations": 45,
+          "seconds": 18.4
+        }
+      ]
+    },
+    {
+      "page": "ab9550_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        9549.1,
+        9599.1
+      ],
+      "pixels": 1250,
+      "reliable": 1250,
+      "grid_points": 4179,
+      "layer_chunk": 12,
+      "mopd_cm": 6.72061928204894,
+      "lines": {
+        "CH4": 98,
+        "CO2": 785,
+        "H2O": 857
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0001,
+        "CO2": 0.01,
+        "H2O": 0.0057
+      },
+      "free_species": [],
+      "negligible_telluric": true,
+      "median_transmission": 0.999978871555835,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": 0.0,
+        "velocity_kms": 3.3533011243933153,
+        "stellar_velocity_kms": 14.294915265686072,
+        "lsf_sigma_kms": 2.0733132400868897,
+        "log_jitter": -4.333174400474821
+      },
+      "pixel_sigma": 0.002657130538789135,
+      "residual_rms": 0.013391957472349586,
+      "residual_rms_over_noise": 5.0400073601398425,
+      "reduced_chi2": 25.40167419026379,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3805.7376200027775,
+          "iterations": 18,
+          "seconds": 22.8
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4766.367664565811,
+          "iterations": 17,
+          "seconds": 12.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4766.367664565811,
+          "iterations": 1,
+          "seconds": 13.0
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4766.376175973728,
+          "iterations": 11,
+          "seconds": 13.4
+        }
+      ]
+    },
+    {
+      "page": "ab9550_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        9549.1,
+        9599.1
+      ],
+      "pixels": 1250,
+      "reliable": 1250,
+      "grid_points": 4179,
+      "layer_chunk": 12,
+      "mopd_cm": 6.738212526242785,
+      "lines": {
+        "CH4": 98,
+        "CO2": 785,
+        "H2O": 857
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0001,
+        "CO2": 0.01,
+        "H2O": 0.0057
+      },
+      "free_species": [],
+      "negligible_telluric": true,
+      "median_transmission": 0.999978871555835,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": 0.0,
+        "velocity_kms": 4.852852815503224,
+        "stellar_velocity_kms": -26.112313457960287,
+        "lsf_sigma_kms": 1.9104332683836174,
+        "log_jitter": -4.174585313432449
+      },
+      "pixel_sigma": 0.0024543654521161397,
+      "residual_rms": 0.015576095951855272,
+      "residual_rms_over_noise": 6.346282269588521,
+      "reduced_chi2": 40.27529864529363,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -3210.098070129332,
+          "iterations": 22,
+          "seconds": 13.4
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -4577.522284330544,
+          "iterations": 18,
+          "seconds": 12.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -4577.522284330829,
+          "iterations": 1,
+          "seconds": 13.0
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -4577.522313350162,
+          "iterations": 6,
+          "seconds": 13.5
+        }
+      ]
+    },
+    {
+      "page": "ab10850_",
+      "epoch": "summer",
+      "wavenumber_cm1": [
+        10849.1,
+        10899.1
+      ],
+      "pixels": 1250,
+      "reliable": 1211,
+      "grid_points": 3680,
+      "layer_chunk": 12,
+      "mopd_cm": 6.7030260378550945,
+      "lines": {
+        "CH4": 9,
+        "CO2": 135,
+        "H2O": 2235
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO2": 0.0002,
+        "H2O": 3.3541
+      },
+      "free_species": [
+        "H2O"
+      ],
+      "median_transmission": 0.953558370809324,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": 1.1154465536629694,
+        "velocity_kms": 0.3993450607070688,
+        "stellar_velocity_kms": 11.516300863195353,
+        "lsf_sigma_kms": 0.6597057269482631,
+        "log_jitter": -3.656957387368244
+      },
+      "pixel_sigma": 0.009006401461772846,
+      "residual_rms": 0.027336997035330622,
+      "residual_rms_over_noise": 3.0352851970191352,
+      "reduced_chi2": 9.212956227243492,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -2235.9918529903794,
+          "iterations": 14,
+          "seconds": 21.0
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -2302.390191421866,
+          "iterations": 42,
+          "seconds": 13.9
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -3153.2034733722257,
+          "iterations": 49,
+          "seconds": 14.6
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -3855.7957785804,
+          "iterations": 51,
+          "seconds": 14.0
+        }
+      ]
+    },
+    {
+      "page": "ab10850_",
+      "epoch": "winter",
+      "wavenumber_cm1": [
+        10849.1,
+        10899.1
+      ],
+      "pixels": 1250,
+      "reliable": 1247,
+      "grid_points": 3680,
+      "layer_chunk": 12,
+      "mopd_cm": 6.7558057704366306,
+      "lines": {
+        "CH4": 9,
+        "CO2": 135,
+        "H2O": 2235
+      },
+      "absent": [
+        "CO",
+        "N2O",
+        "O2"
+      ],
+      "max_optical_depth": {
+        "CH4": 0.0,
+        "CO2": 0.0002,
+        "H2O": 3.3541
+      },
+      "free_species": [
+        "H2O"
+      ],
+      "median_transmission": 0.985731841156639,
+      "parameters": {
+        "CH4": 0.0,
+        "CO2": 0.0,
+        "H2O": -0.06069674277728869,
+        "velocity_kms": 0.4602613025799229,
+        "stellar_velocity_kms": -30.55396043522052,
+        "lsf_sigma_kms": 0.4917368349655007,
+        "log_jitter": -3.2686682437465846
+      },
+      "pixel_sigma": 0.008743109483555618,
+      "residual_rms": 0.0390484280758445,
+      "residual_rms_over_noise": 4.466194567194693,
+      "reduced_chi2": 19.946893912039396,
+      "all_stages_converged": true,
+      "stages": [
+        {
+          "stage": "continuum",
+          "success": true,
+          "objective": -2516.0574015331304,
+          "iterations": 28,
+          "seconds": 13.6
+        },
+        {
+          "stage": "velocity",
+          "success": true,
+          "objective": -2740.1362053512094,
+          "iterations": 34,
+          "seconds": 13.7
+        },
+        {
+          "stage": "columns",
+          "success": true,
+          "objective": -2740.149239767656,
+          "iterations": 47,
+          "seconds": 13.7
+        },
+        {
+          "stage": "stellar",
+          "success": true,
+          "objective": -3428.690822056521,
+          "iterations": 68,
+          "seconds": 14.1
+        }
+      ]
+    }
+  ]
+}

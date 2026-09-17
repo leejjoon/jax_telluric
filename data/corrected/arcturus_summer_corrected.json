@@ -1,0 +1,18 @@
+{
+  "source": "benchmarks/results/arcturus_ab5000_star.npz",
+  "page": "ab5000_",
+  "epoch": "summer",
+  "wavenumber_cm1": [
+    5005.0,
+    5025.0
+  ],
+  "pixels": 1001,
+  "reliable_pixels": 964,
+  "flagged_pixels": 37,
+  "method": "model ratio: (observed / model) * star",
+  "min_transmission": 0.15,
+  "median_transmission": 0.925489682768393,
+  "median_corrected_uncertainty": 0.006202653709840066,
+  "worst_corrected_uncertainty": 0.03742062938971929,
+  "caution": "Flagged pixels have no recoverable signal. 'corrected_naive' is the plain division by the transmission and carries a derivative-shaped artefact at every sharp line; prefer 'corrected'."
+}

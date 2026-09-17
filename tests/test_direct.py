@@ -95,3 +95,80 @@ def test_sparse_direct_applies_hitran_air_pressure_shift():
         jnp.asarray(grid) * shifted.xsvector(296.0, pressure)
     ))(0.7)
     assert jnp.isfinite(gradient)
+
+
+def test_sparse_direct_holds_no_line_by_grid_matrix():
+    """The dense offset matrix is what puts a fine grid out of memory.
+
+    ExoJAX's ``OpaDirect`` keeps ``nu_grid[None, :] - nu_lines[:, None]`` on the
+    device. At terrestrial line densities that is hundreds of megabytes, re-read
+    once per layer. Everything here is rebuilt from the two 1-D vectors instead,
+    so nothing of that shape may survive construction.
+    """
+
+    database = SimpleNamespace(
+        dbtype="hitran", isotope=1, molmass=18.0,
+        nu_lines=np.linspace(4999.0, 5002.0, 400),
+        logsij0=jnp.log(jnp.full(400, 1e-23)),
+        elower=np.full(400, 200.0),
+        n_air=np.full(400, 0.7), gamma_air=np.full(400, 0.07),
+        gamma_self=np.full(400, 0.3), A=np.full(400, 0.1),
+        delta_air=np.full(400, -0.01),
+        qr_interp=lambda isotope, temperature, reference: (temperature / reference) ** 1.5,
+    )
+    grid = np.linspace(4998.0, 5003.0, 2000)
+    calculator = SparseCoreDirect(database, grid, pressure_shift=True)
+    assert calculator.opainfo is None
+    stored = [
+        value for value in vars(calculator).values()
+        if hasattr(value, "ndim") and hasattr(value, "shape") and value.ndim == 2
+    ]
+    assert stored == [], f"a 2-D array survived: {[v.shape for v in stored]}"
+    # The core list is the one thing allowed to scale with line by grid, and
+    # only because it is sparse. This fixture crowds 400 lines into 3 cm-1, so
+    # its 6% is far denser than a real order; the measured IGRINS figure is
+    # 0.14%.
+    assert calculator.core_line.size < 0.1 * database.nu_lines.size * grid.size
+    # Rebuilding the offsets must not change the answer. OpaDirect applies no
+    # pressure shift, so the comparison uses the unshifted calculator.
+    np.testing.assert_allclose(
+        SparseCoreDirect(database, grid).xsvector(275.0, 0.7, 0.01),
+        OpaDirect(database, grid).xsvector(275.0, 0.7, 0.01), rtol=2e-12, atol=1e-35,
+    )
+
+
+def test_core_list_matches_the_dense_selection_it_replaced():
+    """Binary search must reproduce the dense scan exactly, order included.
+
+    The core and wing branches are evaluated by different code, and the scatter
+    add sums in list order, so a different core list is a different answer.
+    """
+
+    from exojax.database.core.broadening import doppler_sigma
+    from exojax.utils.constants import Tref_original
+
+    rng = np.random.default_rng(3)
+    count = 300
+    database = SimpleNamespace(
+        dbtype="hitran", isotope=1, molmass=18.0,
+        nu_lines=np.sort(rng.uniform(4999.0, 5002.0, count)),
+        logsij0=jnp.log(jnp.full(count, 1e-23)), elower=np.full(count, 200.0),
+        n_air=np.full(count, 0.7), gamma_air=np.full(count, 0.07),
+        gamma_self=np.full(count, 0.3), A=np.full(count, 0.1),
+        delta_air=rng.uniform(-0.02, 0.0, count),
+        qr_interp=lambda isotope, temperature, reference: (temperature / reference) ** 1.5,
+    )
+    grid = np.linspace(4998.0, 5003.0, 1500)
+    for pressure_shift in (False, True):
+        calculator = SparseCoreDirect(
+            database, grid, minimum_temperature_k=200.0, maximum_temperature_k=320.0,
+            pressure_shift=pressure_shift, maximum_pressure_bar=1.1,
+        )
+        sigma = np.asarray(doppler_sigma(database.nu_lines, 320.0, database.molmass))
+        margin = (np.abs(database.delta_air) * 1.1 / 1.01325 * Tref_original / 200.0
+                  if pressure_shift else 0.0)
+        half_width = np.sqrt(222.0) * sigma + margin
+        offsets = grid[None, :] - database.nu_lines[:, None]
+        line, column = np.nonzero(np.abs(offsets) <= half_width[:, None])
+        np.testing.assert_array_equal(calculator.core_line, line)
+        np.testing.assert_array_equal(calculator.core_grid, column)

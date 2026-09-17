@@ -1,0 +1,86 @@
+{
+  "page": "ab5025_",
+  "epoch": "summer",
+  "window_cm1": [
+    5025.0,
+    5050.0
+  ],
+  "sub_width_cm1": 5.0,
+  "full_window_h2o_scale": 1.1509710048307178,
+  "subwindow_mean": 1.1523331021116663,
+  "subwindow_std": 0.03635659079833996,
+  "subwindow_peak_to_peak": 0.07509862964560465,
+  "subwindow_fractional_spread": 0.0651709384274264,
+  "subwindows": [
+    {
+      "wavenumber_cm1": [
+        5025.0,
+        5030.0
+      ],
+      "center_cm1": 5027.5,
+      "pixels": 250,
+      "h2o_scale": 1.1840265358201583,
+      "success": true,
+      "residual_rms": 0.018906464478669154,
+      "mean_telluric_depth": 0.08380459708229046,
+      "max_telluric_depth": 0.8995884857238323,
+      "saturated_fraction": 0.0
+    },
+    {
+      "wavenumber_cm1": [
+        5030.0,
+        5035.0
+      ],
+      "center_cm1": 5032.5,
+      "pixels": 242,
+      "h2o_scale": 1.1838014726522532,
+      "success": true,
+      "residual_rms": 0.033079787983630045,
+      "mean_telluric_depth": 0.22012823136245183,
+      "max_telluric_depth": 0.9995800916099513,
+      "saturated_fraction": 0.055415617128463476
+    },
+    {
+      "wavenumber_cm1": [
+        5035.0,
+        5040.0
+      ],
+      "center_cm1": 5037.5,
+      "pixels": 250,
+      "h2o_scale": 1.1089279061745536,
+      "success": true,
+      "residual_rms": 0.013015088705180538,
+      "mean_telluric_depth": 0.08547253262385045,
+      "max_telluric_depth": 0.9579006868712443,
+      "saturated_fraction": 0.005037783375314861
+    },
+    {
+      "wavenumber_cm1": [
+        5040.0,
+        5045.0
+      ],
+      "center_cm1": 5042.5,
+      "pixels": 250,
+      "h2o_scale": 1.1670850828998545,
+      "success": true,
+      "residual_rms": 0.011795436617620232,
+      "mean_telluric_depth": 0.09607507165520046,
+      "max_telluric_depth": 0.8861790448833782,
+      "saturated_fraction": 0.0
+    },
+    {
+      "wavenumber_cm1": [
+        5045.0,
+        5050.0
+      ],
+      "center_cm1": 5047.5,
+      "pixels": 248,
+      "h2o_scale": 1.117824513011512,
+      "success": true,
+      "residual_rms": 0.018688416537018943,
+      "mean_telluric_depth": 0.18633722316784804,
+      "max_telluric_depth": 0.9999220306655423,
+      "saturated_fraction": 0.020202020202020204
+    }
+  ]
+}

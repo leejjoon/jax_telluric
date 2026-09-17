@@ -20,6 +20,7 @@ class ExoJAXOpacityBackend:
 
     calculators: Mapping[str, object]
     vectorize_layers: bool = False
+    layer_chunk_size: int | None = None
 
     @classmethod
     def prepare(
@@ -32,6 +33,7 @@ class ExoJAXOpacityBackend:
         vectorize_layers: bool = False,
         mixed_precision: bool = False,
         pressure_shift: bool = False,
+        layer_chunk_size: int | None = None,
     ) -> "ExoJAXOpacityBackend":
         """Construct Direct, sparse-core Direct, or PreMODIT calculators.
 
@@ -42,6 +44,13 @@ class ExoJAXOpacityBackend:
         HITRAN-style databases; outside its configured temperature or pressure
         bounds it falls back to a full Direct calculation.
         ``vectorize_layers=True`` reduces GPU compile time for fixed profiles.
+        Its wing array is dense in lines by grid by layer, so on a fine grid it
+        can exceed device memory; ``layer_chunk_size`` then vectorizes that many
+        layers at a time. Equal-sized chunks compile once and reuse, so peak
+        memory falls by the chunk fraction while compile time barely moves.
+        A Python loop over single layers (``vectorize_layers=False``) also fits
+        in memory but unrolls the whole calculation once per layer, which
+        multiplies compile time instead.
         ``mixed_precision=True`` applies only to ``direct_sparse``: evaluate
         wings and stable wing derivative coefficients in float32 while keeping
         cores, line physics, and cross-section accumulation in float64.
@@ -87,7 +96,13 @@ class ExoJAXOpacityBackend:
                 )
             else:
                 raise ValueError(f"unknown opacity method for {species}: {method}")
-        return cls(calculators, vectorize_layers=vectorize_layers)
+        if layer_chunk_size is not None and layer_chunk_size < 1:
+            raise ValueError("layer_chunk_size must be a positive number of layers")
+        return cls(
+            calculators,
+            vectorize_layers=vectorize_layers,
+            layer_chunk_size=layer_chunk_size,
+        )
 
     def __post_init__(self) -> None:
         if not self.calculators:
@@ -102,14 +117,29 @@ class ExoJAXOpacityBackend:
     def species(self) -> tuple[str, ...]:
         return tuple(self.calculators)
 
+    def _vectorized(self, calculator, temperature_k, pressure_bar, self_pressure_bar):
+        layers = temperature_k.shape[0]
+        chunk = self.layer_chunk_size or layers
+        if chunk >= layers:
+            return jax.vmap(calculator.xsvector)(temperature_k, pressure_bar, self_pressure_bar)
+        parts = [
+            jax.vmap(calculator.xsvector)(
+                temperature_k[start : start + chunk],
+                pressure_bar[start : start + chunk],
+                self_pressure_bar[start : start + chunk],
+            )
+            for start in range(0, layers, chunk)
+        ]
+        return jnp.concatenate(parts, axis=0)
+
     def cross_sections(self, temperature_k, pressure_bar, partial_pressure_bar):
         result = {}
         for species, calculator in self.calculators.items():
             # OpaDirect is the only ExoJAX 2.5 calculator with a Pself argument.
             if getattr(calculator, "method", None) == "lpf":
                 if self.vectorize_layers:
-                    result[species] = jax.vmap(calculator.xsvector)(
-                        temperature_k, pressure_bar, partial_pressure_bar[species]
+                    result[species] = self._vectorized(
+                        calculator, temperature_k, pressure_bar, partial_pressure_bar[species]
                     )
                     continue
                 result[species] = jnp.stack(

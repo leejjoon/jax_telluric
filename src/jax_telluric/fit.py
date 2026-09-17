@@ -31,28 +31,65 @@ class FitResult:
 
 
 class _ParameterCodec:
-    def __init__(self, species: Sequence[str], continuum_size: int) -> None:
+    """Ordered mapping between named parameters and the optimizer's vector.
+
+    ``stellar_velocity_kms`` is present only when the order carries a
+    model-grid source. Without one it cannot affect the prediction, so freeing
+    it would contribute an identically zero gradient column and a singular
+    Hessian rather than an unconstrained parameter.
+    """
+
+    def __init__(
+        self,
+        species: Sequence[str],
+        continuum_size: int,
+        include_stellar_velocity: bool = False,
+    ) -> None:
         self.species = tuple(species)
         self.continuum_size = continuum_size
+        self.include_stellar_velocity = include_stellar_velocity
+        names = [*self.species, "velocity_kms"]
+        if include_stellar_velocity:
+            names.append("stellar_velocity_kms")
+        names.extend(("wavelength_stretch", "lsf_sigma_kms"))
+        names.extend(f"continuum_{index}" for index in range(continuum_size))
+        names.append("log_jitter")
+        self.names = tuple(names)
+        self._offset = {name: index for index, name in enumerate(self.names)}
+
+    @property
+    def continuum_start(self) -> int:
+        return self._offset["continuum_0"] if self.continuum_size else 0
 
     def pack(self, params: TelluricParameters) -> np.ndarray:
-        return np.asarray(
-            [*(params.log_column_scales[name] for name in self.species), params.velocity_kms,
-             params.wavelength_stretch, params.lsf_sigma_kms,
-             *np.asarray(params.continuum_coeffs), params.log_jitter],
-            dtype=float,
-        )
+        values = {
+            **{name: params.log_column_scales[name] for name in self.species},
+            "velocity_kms": params.velocity_kms,
+            "stellar_velocity_kms": params.stellar_velocity_kms,
+            "wavelength_stretch": params.wavelength_stretch,
+            "lsf_sigma_kms": params.lsf_sigma_kms,
+            "log_jitter": params.log_jitter,
+            **{
+                f"continuum_{index}": value
+                for index, value in enumerate(np.asarray(params.continuum_coeffs))
+            },
+        }
+        return np.asarray([values[name] for name in self.names], dtype=float)
 
     def unpack(self, vector: jnp.ndarray) -> TelluricParameters:
-        nspecies = len(self.species)
-        start_continuum = nspecies + 3
+        start = self.continuum_start
         return TelluricParameters(
-            log_column_scales={name: vector[index] for index, name in enumerate(self.species)},
-            velocity_kms=vector[nspecies],
-            wavelength_stretch=vector[nspecies + 1],
-            lsf_sigma_kms=vector[nspecies + 2],
-            continuum_coeffs=vector[start_continuum : start_continuum + self.continuum_size],
-            log_jitter=vector[-1],
+            log_column_scales={name: vector[self._offset[name]] for name in self.species},
+            velocity_kms=vector[self._offset["velocity_kms"]],
+            wavelength_stretch=vector[self._offset["wavelength_stretch"]],
+            lsf_sigma_kms=vector[self._offset["lsf_sigma_kms"]],
+            continuum_coeffs=vector[start : start + self.continuum_size],
+            log_jitter=vector[self._offset["log_jitter"]],
+            stellar_velocity_kms=(
+                vector[self._offset["stellar_velocity_kms"]]
+                if self.include_stellar_velocity
+                else 0.0
+            ),
         )
 
 
@@ -72,23 +109,83 @@ def _projected_gradient(vector, gradient, lower, upper):
     projected[(vector >= upper - tolerance) & (projected < 0.0)] = 0.0
     return projected
 
+class OrderObjective:
+    """Compiled value and gradient for one model and one order, reusable.
+
+    XLA compilation of a telluric forward model costs seconds while one
+    evaluation costs milliseconds, so what a staged fit spends is dominated by
+    how many times it compiles. ``fit_order`` builds a fresh ``jax.jit``
+    closure per call, and a new Python function object is a new cache entry, so
+    four stages over one page compile the same graph four times.
+
+    This compiles over the *full* parameter vector, leaving the bounds, the
+    free set, and the optimizer's rescaling outside. Those are exactly what
+    changes between stages, so one instance passed to every stage of a page
+    replaces N compilations with one.
+    """
+
+    def __init__(
+        self,
+        model: TelluricModel,
+        order: SpectralOrder,
+        continuum_size: int,
+    ) -> None:
+        self.model = model
+        self.order = order
+        self.codec = _ParameterCodec(
+            model.species,
+            int(continuum_size),
+            include_stellar_velocity=order.source_flux_model_grid is not None,
+        )
+        uncertainty = jnp.asarray(order.uncertainty)
+        mask = jnp.asarray(order.mask)
+        flux = jnp.where(mask, jnp.asarray(order.flux), 0.0)
+
+        def objective(vector: jnp.ndarray) -> jnp.ndarray:
+            parameters = self.codec.unpack(vector)
+            prediction = model.predict(order, parameters)
+            variance = uncertainty**2 + jnp.exp(2.0 * jnp.asarray(parameters.log_jitter))
+            # Dividing inside the logarithm removes a parameter-independent
+            # constant. L-BFGS-B uses relative objective reduction to stop, and
+            # the large negative normalization term otherwise causes premature
+            # convergence for high-S/N orders.
+            terms = (flux - prediction) ** 2 / variance + jnp.log(variance / uncertainty**2)
+            return 0.5 * jnp.sum(jnp.where(mask, terms, 0.0))
+
+        self._value_and_grad = jax.jit(jax.value_and_grad(objective))
+
+    def __call__(self, vector: np.ndarray) -> tuple[float, np.ndarray]:
+        value, gradient = self._value_and_grad(jnp.asarray(vector))
+        return float(value), np.asarray(gradient, dtype=float)
+
+
 def fit_order(
     model: TelluricModel,
     order: SpectralOrder,
     initial: TelluricParameters,
     bounds: Mapping[str, tuple[float, float]],
+    objective: OrderObjective | None = None,
 ) -> FitResult:
     """Fit one spectral order using a heteroscedastic Gaussian likelihood.
 
     Bound keys are molecule names plus ``velocity_kms``,
     ``wavelength_stretch``, ``lsf_sigma_kms``, ``continuum_0`` ... and
-    ``log_jitter``.
+    ``log_jitter``, and additionally ``stellar_velocity_kms`` when the order
+    carries ``source_flux_model_grid``. Setting a bound's lower and upper
+    values equal pins that parameter.
+
+    Pass ``objective`` -- an :class:`OrderObjective` built once for this model
+    and order -- to reuse one compilation across the stages of a staged fit.
     """
 
-    codec = _ParameterCodec(model.species, len(np.asarray(initial.continuum_coeffs)))
-    names = [*codec.species, "velocity_kms", "wavelength_stretch", "lsf_sigma_kms"]
-    names.extend(f"continuum_{index}" for index in range(codec.continuum_size))
-    names.append("log_jitter")
+    if objective is None:
+        objective = OrderObjective(model, order, len(np.asarray(initial.continuum_coeffs)))
+    elif objective.model is not model or objective.order is not order:
+        raise ValueError("the compiled objective was built for a different model or order")
+    codec = objective.codec
+    if codec.continuum_size != len(np.asarray(initial.continuum_coeffs)):
+        raise ValueError("the compiled objective was built for a different continuum degree")
+    names = list(codec.names)
     missing = [name for name in names if name not in bounds]
     if missing:
         raise ValueError(f"missing parameter bounds: {', '.join(missing)}")
@@ -115,35 +212,16 @@ def fit_order(
         for index, scale in zip(free_indices, scales)
     ]
 
-    flux = jnp.asarray(order.flux)
-    uncertainty = jnp.asarray(order.uncertainty)
-    mask = jnp.asarray(order.mask)
-    flux = jnp.where(mask, flux, 0.0)
-
-    center_jax = jnp.asarray(center)
-    scales_jax = jnp.asarray(scales)
-
-    def full_vector(scaled_vector: jnp.ndarray) -> jnp.ndarray:
-        return center_jax.at[free_indices].set(
-            center_jax[free_indices] + scales_jax * scaled_vector
-        )
-
-    def objective(scaled_vector: jnp.ndarray) -> jnp.ndarray:
-        parameters = codec.unpack(full_vector(scaled_vector))
-        prediction = model.predict(order, parameters)
-        variance = uncertainty**2 + jnp.exp(2.0 * jnp.asarray(parameters.log_jitter))
-        # Dividing inside the logarithm removes a parameter-independent
-        # constant. L-BFGS-B uses relative objective reduction to stop, and
-        # the large negative normalization term otherwise causes premature
-        # convergence for high-S/N orders.
-        terms = (flux - prediction) ** 2 / variance + jnp.log(variance / uncertainty**2)
-        return 0.5 * jnp.sum(jnp.where(mask, terms, 0.0))
-
-    value_and_grad = jax.jit(jax.value_and_grad(objective))
+    def expand(scaled_vector: np.ndarray) -> np.ndarray:
+        full = center.copy()
+        full[free_indices] = center[free_indices] + scales * np.asarray(scaled_vector)
+        return full
 
     def scipy_objective(vector: np.ndarray) -> tuple[float, np.ndarray]:
-        value, gradient = value_and_grad(jnp.asarray(vector))
-        return float(value), np.asarray(gradient, dtype=float)
+        # The rescaling is affine, so the chain rule is one multiplication and
+        # the compiled function never has to know which parameters are free.
+        value, gradient = objective(expand(vector))
+        return value, gradient[free_indices] * scales
 
     if free_indices.size:
         result = minimize(
@@ -182,7 +260,7 @@ def fit_order(
         gradient_norm = 0.0
 
         class FixedResult:
-            fun = float(objective(jnp.asarray(initial_scaled)))
+            fun = float(objective(expand(initial_scaled))[0])
             nit = 0
             hess_inv = None
 

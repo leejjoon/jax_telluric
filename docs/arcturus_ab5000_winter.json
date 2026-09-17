@@ -1,0 +1,157 @@
+{
+  "page": {
+    "path": "/home/jjlee/work/differentiable_stellar_spectroscopy/data/atlases/arcturus/ir/ab5000_",
+    "name": "ab5000_",
+    "epoch": "winter",
+    "sha256": "c7d342187f200e5fb358158d73cdb670fc9bf3ba7e671c08bfda9613fc2ae5d7",
+    "column": "observed",
+    "wavenumber_cm1": [
+      5005.0,
+      5025.0
+    ],
+    "pixels": 1001,
+    "masked": 5,
+    "spacing_cm1": 0.020000000000436557,
+    "uncertainty": 0.005320313766732659
+  },
+  "grid": {
+    "resolving_power": 100000.0,
+    "samples_per_resolution": 4.0,
+    "margin_cm1": 25.0,
+    "points": 5585,
+    "velocity_step_kms": 0.7493926810267603
+  },
+  "physics": {
+    "accuracy_mode": "mt_ckd",
+    "continuum": "native MT_CKD 4.3",
+    "pressure_shift": true,
+    "mixed_precision": true,
+    "pixel_integration": "point",
+    "instrument": "boxcar FTS sinc",
+    "mopd_cm": 13.59999999970314,
+    "instrument_resolving_power": 113041.24437273454,
+    "profile": "data/profiles/kitt_peak_1994.csv",
+    "species": [
+      "CO2",
+      "H2O"
+    ],
+    "lines_per_species": {
+      "CO2": 6496,
+      "H2O": 1978
+    },
+    "species_without_lines": [],
+    "zenith_angle_deg": 0.0,
+    "lblrtm_bias_note": "mt_ckd mode disagrees with LBLRTM by median 0.0039 / p99 0.058 in this window (data/corrections/lblrtm_5000_5020.json); the fitted column scales absorb part of that and are biased accordingly."
+  },
+  "stellar": {
+    "source": "data/stellar/arcturus_payne_zero_1960_2130nm.npz",
+    "vsini_kms": 2.0,
+    "macroturbulence_kms": 2.15,
+    "readme_velocity_kms": -26.111923091801984
+  },
+  "pinned": {},
+  "stages": [
+    {
+      "stage": "continuum",
+      "free": [
+        "continuum_0",
+        "continuum_1",
+        "continuum_2",
+        "continuum_3",
+        "log_jitter"
+      ],
+      "objective": -2025.6218359543682,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 31,
+      "seconds": 71.75
+    },
+    {
+      "stage": "velocity",
+      "free": [
+        "velocity_kms",
+        "lsf_sigma_kms",
+        "continuum_0",
+        "continuum_1",
+        "continuum_2",
+        "continuum_3",
+        "log_jitter"
+      ],
+      "objective": -2045.4427527999414,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 32,
+      "seconds": 43.96
+    },
+    {
+      "stage": "columns",
+      "free": [
+        "CO2",
+        "H2O",
+        "velocity_kms",
+        "lsf_sigma_kms",
+        "continuum_0",
+        "continuum_1",
+        "continuum_2",
+        "continuum_3",
+        "log_jitter"
+      ],
+      "objective": -3217.4474399592314,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 53,
+      "seconds": 46.01
+    },
+    {
+      "stage": "stellar",
+      "free": [
+        "CO2",
+        "H2O",
+        "velocity_kms",
+        "lsf_sigma_kms",
+        "continuum_0",
+        "continuum_1",
+        "continuum_2",
+        "continuum_3",
+        "log_jitter",
+        "stellar_velocity_kms"
+      ],
+      "objective": -3285.1003499445314,
+      "success": true,
+      "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+      "iterations": 50,
+      "seconds": 46.35
+    }
+  ],
+  "at_bound": [],
+  "parameters": {
+    "CO2": -0.050920358455963766,
+    "H2O": -0.9602179972205421,
+    "velocity_kms": 0.15366896589024862,
+    "stellar_velocity_kms": -26.757801160743856,
+    "lsf_sigma_kms": 0.5176954279597706,
+    "continuum_coeffs": [
+      -0.009337975189355686,
+      0.0021930924625834618,
+      0.0018123129600172952,
+      -0.0016453086402216483
+    ],
+    "log_jitter": -3.8273002454838623
+  },
+  "residuals": {
+    "reduced_chi2": 17.740655901473588,
+    "rms": 0.02240897963144436,
+    "percentile_99_absolute": 0.07290188424054153,
+    "jitter_over_uncertainty": 4.091545424860298
+  },
+  "atlas_telluric_comparison": {
+    "restricted_to": "atlas telluric in (0.2, 1.0]",
+    "pixels": 983,
+    "median_absolute": 0.0058964242160128855,
+    "percentile_99_absolute": 0.33332463800394135,
+    "note": "Hinkle's telluric column is a scaled transmission from a different observation; a consistency floor, not truth."
+  },
+  "runtime_seconds": 212.6,
+  "platform": "cuda:0",
+  "jax": "0.6.2"
+}
